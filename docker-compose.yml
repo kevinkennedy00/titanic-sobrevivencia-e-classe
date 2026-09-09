@@ -24,6 +24,7 @@ services:
       DATABASE_URL: postgresql+psycopg://${TITANIC_POSTGRES_USER}:${TITANIC_POSTGRES_PASSWORD}@postgres:5432/${TITANIC_POSTGRES_DB}
       CORS_ORIGINS: ${TITANIC_CORS_ORIGINS}
       DATASET_PATH: /workspace/train.csv
+      TEAM_PATH: /workspace/team
     volumes:
       - ./train.csv:/workspace/train.csv:ro
       - ./06_membros_equipe:/workspace/team:ro

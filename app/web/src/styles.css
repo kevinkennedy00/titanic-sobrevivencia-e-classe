@@ -1,4 +1,10 @@
 .app-shell { min-height: 100vh; overflow-x: clip; }
+.hero-member, .team-credit button { padding: 0; border: 0; background: transparent; cursor: pointer; }
+.team-credit button { display: inline-flex; align-items: center; gap: 7px; min-height: 44px; color: #fff; font: inherit; text-transform: none; }
+.hero-member:focus-visible, .team-credit button:focus-visible { outline: 2px solid var(--ds-color-primary); outline-offset: 6px; border-radius: 8px; }
+.speaker-chip { transition: opacity var(--ds-duration-fast) var(--ds-ease-out), visibility var(--ds-duration-fast); }
+.speaker-chip.speaker-chip--hidden { opacity: 0; visibility: hidden; pointer-events: none; }
+@media (prefers-reduced-motion: reduce) { .speaker-chip { transition: none; } }
 .calculation-steps { padding-left: 24px; margin: 28px 0; }
 .calculation-steps li { padding-left: 8px; margin-bottom: 24px; }
 .calculation-steps li::marker { color: var(--ds-color-primary); }

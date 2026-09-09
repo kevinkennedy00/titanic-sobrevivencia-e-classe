@@ -432,6 +432,16 @@ function App() {
   const [introVisible, setIntroVisible] = useState(savedSection === "hero");
   const restoredSection = useRef(false);
   const [sectionReady, setSectionReady] = useState(false);
+  const [creditsVisible, setCreditsVisible] = useState(false);
+  const creditsRef = useRef<HTMLDivElement | null>(null);
+  useEffect(() => {
+    if (!data || !creditsRef.current) return;
+    const observer = new IntersectionObserver(([entry]) => {
+      setCreditsVisible(entry.isIntersecting && entry.intersectionRatio >= 0.99);
+    }, { threshold: [0, 0.99, 1] });
+    observer.observe(creditsRef.current);
+    return () => observer.disconnect();
+  }, [data]);
   const passengerAbortRef = useRef<AbortController | null>(null);
 
   useEffect(() => {
@@ -757,7 +767,7 @@ function App() {
                 aria-label="Equipe da apresentação"
               >
                 {data.sections.map((section) => (
-                  <div className="hero-member" key={section.slug}>
+                  <button type="button" className="hero-member" key={section.slug} aria-label={`Ir para ${section.speaker}`} onClick={() => navigate(targets.indexOf(section.slug))}>
                     <span className={`hero-avatar ${section.speaker.toLowerCase().includes("nikson") ? "hero-avatar--nikson" : ""}`}>
                     <img
                       src={section.photo}
@@ -765,7 +775,7 @@ function App() {
                     />
                     </span>
                     <span>{section.speaker}</span>
-                  </div>
+                  </button>
                 ))}
               </div>
               <div className="hero-actions t-stagger-line t-stagger-line--7">
@@ -1263,13 +1273,13 @@ function App() {
                 </button>
               </div>
             </div>
-            <div className="team-credit">
+            <div className="team-credit" ref={creditsRef}>
               <span>Apresentação por</span>
               {data.sections.map((section) => (
-                <div key={section.slug}>
+                <button type="button" key={section.slug} aria-label={`Ir para ${section.speaker}`} onClick={() => navigate(targets.indexOf(section.slug))}>
                   <img src={section.photo} alt="" />
                   <b>{section.speaker.split(" ")[0]}</b>
-                </div>
+                </button>
               ))}
             </div>
           </div>
@@ -1282,7 +1292,7 @@ function App() {
         </section>
       </main>
       {activeSpeaker && (
-        <div className="speaker-chip">
+        <div className={`speaker-chip ${creditsVisible ? "speaker-chip--hidden" : ""}`} aria-hidden={creditsVisible}>
           <img src={activeSpeaker.photo} alt="" />
           <span>{activeSpeaker.speaker}</span>
         </div>
