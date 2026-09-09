@@ -15,7 +15,11 @@ from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import DeclarativeBase, Mapped, Session, mapped_column, sessionmaker
 
 
-PROJECT_ROOT = Path(__file__).resolve().parents[3]
+SOURCE_PATH = Path(__file__).resolve()
+PROJECT_ROOT = next(
+    (parent for parent in SOURCE_PATH.parents if (parent / "train.csv").exists()),
+    Path.cwd(),
+)
 DATABASE_URL = os.getenv(
     "DATABASE_URL",
     "sqlite:////tmp/titanic.db" if os.getenv("VERCEL") else f"sqlite:///{PROJECT_ROOT / 'titanic.db'}",
