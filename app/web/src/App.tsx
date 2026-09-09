@@ -522,7 +522,8 @@ function App() {
       let current = 0;
       for (const node of nodes) {
         const marker = node.querySelector(".speaker-mark") || node;
-        if (marker.getBoundingClientRect().top < entranceLine) {
+        const boundary = node.id === "question" && window.matchMedia("(max-width: 600px)").matches ? 80 : entranceLine;
+        if (marker.getBoundingClientRect().top < boundary) {
           current = Number(node.dataset.step ?? 0);
         }
       }
@@ -730,6 +731,7 @@ function App() {
           <div className="hero-lines" aria-hidden="true" />
           <div className="hero-layout">
             <div className={`hero-copy t-stagger ${introVisible ? "" : "is-shown"}`}>
+              <div className="hero-mobile-cover">
               <div className="institution-lockup t-stagger-line t-stagger-line--1">
                 <img
                   className="institution-logo"
@@ -762,6 +764,8 @@ function App() {
                   <strong>{data.institution} · 223711 · Noite</strong>
                 </div>
               </div>
+              </div>
+              <div className="hero-mobile-team">
               <div
                 className="hero-team t-stagger-line t-stagger-line--6"
                 aria-label="Equipe da apresentação"
@@ -791,6 +795,7 @@ function App() {
                 >
                   <Icon name="database" size={15} /> Explorar a base
                 </button>
+              </div>
               </div>
             </div>
           </div>
