@@ -7,7 +7,7 @@ from typing import Any
 from urllib.parse import quote
 
 import pandas as pd
-from fastapi import Depends, FastAPI, HTTPException, Query
+from fastapi import Depends, FastAPI, HTTPException, Query, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from sqlalchemy import Boolean, Float, Integer, JSON, String, Text, create_engine, func, select, text
@@ -265,6 +265,16 @@ app.add_middleware(
     allow_methods=["GET"],
     allow_headers=["*"],
 )
+
+
+@app.middleware("http")
+async def restore_vercel_route(request: Request, call_next):
+    """Restore the original API path after Vercel's single-function rewrite."""
+    if request.url.path == "/api/index.py":
+        route = request.query_params.get("path")
+        if route:
+            request.scope["path"] = "/" + route.lstrip("/")
+    return await call_next(request)
 
 if TEAM_PATH.exists():
     app.mount("/team", StaticFiles(directory=TEAM_PATH), name="team")

@@ -1,14 +1,20 @@
 {
-  "buildCommand": "cd app/web && npm ci && npm run build",
-  "outputDirectory": "app/web/dist",
-  "functions": {
-    "api/index.py": {
-      "includeFiles": "{train.csv,06_membros_equipe/**,app/api/app/**}"
+  "builds": [
+    {
+      "src": "api/index.py",
+      "use": "@vercel/python",
+      "config": {
+        "includeFiles": ["train.csv", "06_membros_equipe/**", "app/api/app/**"]
+      }
+    },
+    {
+      "src": "app/web/package.json",
+      "use": "@vercel/static-build",
+      "config": { "distDir": "dist" }
     }
-  },
+  ],
   "rewrites": [
-    { "source": "/api/(.*)", "destination": "/api/index.py" },
-    { "source": "/team/(.*)", "destination": "/api/index.py" },
-    { "source": "/(.*)", "destination": "/index.html" }
+    { "source": "/api/(.*)", "destination": "/api/index.py?path=api/$1" },
+    { "source": "/team/(.*)", "destination": "/api/index.py?path=team/$1" }
   ]
 }
