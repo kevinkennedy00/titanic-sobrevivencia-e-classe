@@ -1,0 +1,20 @@
+# Runtime and local secrets
+.env
+app/api/.venv/
+app/web/node_modules/
+app/web/dist/
+__pycache__/
+*.py[cod]
+
+# Docker and local databases
+postgres-data/
+titanic.db
+
+# Generated or archival material kept outside the deployable source tree
+tmp/
+work/
+outputs/
+
+# Editor and OS files
+.DS_Store
+Thumbs.db

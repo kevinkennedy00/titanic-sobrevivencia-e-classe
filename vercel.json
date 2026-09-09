@@ -1,0 +1,14 @@
+{
+  "buildCommand": "cd app/web && npm ci && npm run build",
+  "outputDirectory": "app/web/dist",
+  "functions": {
+    "api/index.py": {
+      "includeFiles": "{train.csv,06_membros_equipe/**,app/api/app/**}"
+    }
+  },
+  "rewrites": [
+    { "source": "/api/(.*)", "destination": "/api/index.py" },
+    { "source": "/team/(.*)", "destination": "/api/index.py" },
+    { "source": "/(.*)", "destination": "/index.html" }
+  ]
+}
