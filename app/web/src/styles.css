@@ -1,5 +1,6 @@
 .app-shell { min-height: 100vh; overflow-x: clip; }
 .hero-mobile-cover, .hero-mobile-team { display: contents; }
+.hero-team-title { margin: 20px 0 0; color: var(--ds-text-muted); font: 600 .7rem/1.4 var(--ds-font-display); text-align: center; }
 .hero-member, .team-credit button { padding: 0; border: 0; background: transparent; cursor: pointer; }
 .team-credit button { display: inline-flex; align-items: center; gap: 7px; min-height: 44px; color: #fff; font: inherit; text-transform: none; }
 .hero-member:focus-visible, .team-credit button:focus-visible { outline: 2px solid var(--ds-color-primary); outline-offset: 6px; border-radius: 8px; }
@@ -359,4 +360,6 @@ html[data-theme="light"] .hero-aurora {
   .hero-mobile-team { display: flex; flex-direction: column; justify-content: center; min-height: 100svh; box-sizing: border-box; padding-top: 96px; padding-bottom: 100px; }
   .stage-hero .hero-mobile-team .hero-team { margin-top: 0; gap: 24px; }
   .stage-hero .hero-mobile-team .hero-actions { margin-top: 36px; }
+  .hero-mobile-team .hero-team-title { margin: 0 0 36px; color: var(--ds-text-primary); font: 700 clamp(2rem, 10.8vw, 3.5rem)/.95 var(--ds-font-display); letter-spacing: -.04em; text-align: center; }
+  .hero-mobile-team .hero-team-title span { display: block; color: transparent; -webkit-text-stroke: 1px var(--ds-color-primary); }
 }

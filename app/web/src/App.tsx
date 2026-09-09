@@ -766,6 +766,7 @@ function App() {
               </div>
               </div>
               <div className="hero-mobile-team">
+              <h2 className="hero-team-title">Membros <span>da Equipe</span></h2>
               <div
                 className="hero-team t-stagger-line t-stagger-line--6"
                 aria-label="Equipe da apresentação"
