@@ -279,7 +279,7 @@ function Overlay({
     closeRef.current?.focus();
     return () => {
       document.body.style.overflow = previousOverflow;
-      previous?.focus?.();
+      previous?.focus?.({ preventScroll: true });
     };
   }, []);
   const onKeyDown = (event: ReactKeyboardEvent<HTMLElement>) => {

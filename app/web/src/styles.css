@@ -357,9 +357,50 @@ html[data-theme="light"] .hero-aurora {
   .app-shell .stage-hero { display: block; padding-top: 0; padding-bottom: 0; }
   .hero-mobile-cover { display: flex; flex-direction: column; justify-content: center; min-height: 100svh; box-sizing: border-box; padding-top: 94px; padding-bottom: 24px; }
   .stage-hero .hero-mobile-cover .hero-academic { width: 100%; box-sizing: border-box; margin-top: 24px; margin-bottom: 0; }
-  .hero-mobile-team { display: flex; flex-direction: column; justify-content: center; min-height: 100svh; box-sizing: border-box; padding-top: 96px; padding-bottom: 100px; }
-  .stage-hero .hero-mobile-team .hero-team { margin-top: 0; gap: 24px; }
-  .stage-hero .hero-mobile-team .hero-actions { margin-top: 36px; }
-  .hero-mobile-team .hero-team-title { margin: 0 0 36px; color: var(--ds-text-primary); font: 700 clamp(2rem, 10.8vw, 3.5rem)/.95 var(--ds-font-display); letter-spacing: -.04em; text-align: center; }
+  .hero-mobile-team { display: flex; flex-direction: column; justify-content: center; min-height: 100svh; box-sizing: border-box; padding-top: 84px; padding-bottom: 76px; }
+  .stage-hero .hero-mobile-team .hero-team { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); margin-top: 0; gap: clamp(16px, 2.6svh, 24px) 18px; }
+  .hero-mobile-team .hero-member { width: auto; gap: 9px; font-size: .76rem; }
+  .hero-mobile-team .hero-member:last-child:nth-child(odd) { grid-column: 1 / -1; justify-self: center; }
+  .hero-mobile-team .hero-member .hero-avatar { width: clamp(64px, 9svh, 76px); height: clamp(64px, 9svh, 76px); }
+  .stage-hero .hero-mobile-team .hero-actions { margin-top: clamp(22px, 3.5svh, 32px); gap: 12px; }
+  .hero-mobile-team .hero-team-title { margin: 0 0 clamp(24px, 4svh, 36px); color: var(--ds-text-primary); font: 700 clamp(2rem, 9.5vw, 2.65rem)/.98 var(--ds-font-display); letter-spacing: -.04em; text-align: center; }
   .hero-mobile-team .hero-team-title span { display: block; color: transparent; -webkit-text-stroke: 1px var(--ds-color-primary); }
+}
+
+/* Phone reading rhythm: content and controls keep their own space. */
+@media (max-width: 600px) {
+  .app-shell .step-rail { width: 44px; right: env(safe-area-inset-right, 0px); }
+  .app-shell .step-dot { width: 44px; height: 44px; }
+  .app-shell .step-dot::before { top: 18px; left: 18px; }
+  .app-shell .stage:not(.stage-hero) { padding-top: 96px; padding-bottom: max(28px, env(safe-area-inset-bottom)); }
+  .app-shell .stage-nav { position: relative; inset: auto; margin-top: 36px; gap: 16px; align-items: stretch; }
+  .stage-nav .next-control { margin-left: auto; text-align: right; justify-content: flex-end; }
+  .stage-nav .prev-control, .stage-nav .next-control { line-height: 1.35; padding-block: 10px; }
+  .stage-nav .ds-icon { flex-shrink: 0; }
+  .section-intro h2 { font-size: clamp(2.3rem, 11.4vw, 3rem); line-height: .96; letter-spacing: -.04em; overflow-wrap: break-word; }
+  .opening-question-copy h2 { font-size: clamp(2.3rem, 11.4vw, 3rem); line-height: .96; }
+  .stage-inner, .question-stage-inner, .bruna-layout > *, .comparison-layout > *, .conclusion-layout > * { min-width: 0; }
+  .class-row { grid-template-columns: 22px 62px minmax(0, 1fr) 44px; gap: 6px; padding-inline: 0; }
+  .class-row:hover, .class-row.is-selected { transform: none; }
+  .class-row strong { font-size: .85rem; }
+  .class-row small { line-height: 1.4; }
+  .chart-legend { flex-wrap: wrap; gap: 10px; line-height: 1.4; }
+  .panel-heading { line-height: 1.4; }
+  .panel-heading > .ds-icon { flex-shrink: 0; }
+  .survival-number { font-size: clamp(4rem, 20vw, 5.4rem); letter-spacing: -.06em; }
+  .survival-side { gap: 12px; }
+  .survival-side strong { font-size: .8rem; }
+  .team-credit { gap: 8px 14px; }
+  .overlay { padding: max(8px, env(safe-area-inset-top)) 8px max(8px, env(safe-area-inset-bottom)); }
+  .overlay-panel { max-height: calc(100dvh - max(16px, env(safe-area-inset-top)) - max(16px, env(safe-area-inset-bottom))); overscroll-behavior: contain; padding: 20px; }
+  .overlay-header { gap: 12px; }
+  .overlay-header .icon-button { flex-shrink: 0; }
+  .overlay-header h2 { font-size: 1.8rem; line-height: 1.05; letter-spacing: -.04em; }
+  .formula-body { margin-top: 28px; }
+  .formula-body h3 { font-size: 1.9rem; line-height: 1.05; letter-spacing: -.04em; }
+  .formula-expression { overflow-wrap: anywhere; font-size: .95rem; line-height: 1.65; }
+  .calculation-steps { padding-left: 20px; }
+  .calculation-steps li { padding-left: 4px; }
+  .explorer-controls { gap: 10px; flex-wrap: wrap; }
+  .explorer-controls .ds-button { flex: 1 1 auto; min-height: 44px; }
 }
