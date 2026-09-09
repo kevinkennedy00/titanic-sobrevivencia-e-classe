@@ -390,7 +390,11 @@ html[data-theme="light"] .hero-aurora {
   .survival-number { font-size: clamp(4rem, 20vw, 5.4rem); letter-spacing: -.06em; }
   .survival-side { gap: 12px; }
   .survival-side strong { font-size: .8rem; }
-  .team-credit { gap: 8px 14px; }
+  .team-credit { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 8px 4px; }
+  .team-credit > span { grid-column: 1 / -1; margin-right: 0; }
+  .team-credit button { min-width: 0; gap: 3px; font-size: clamp(.4rem, 1.65vw, .55rem); }
+  .team-credit button img { width: clamp(18px, 5vw, 24px); height: clamp(18px, 5vw, 24px); flex-shrink: 0; }
+  .team-credit button b { white-space: nowrap; }
   .overlay { padding: max(8px, env(safe-area-inset-top)) 8px max(8px, env(safe-area-inset-bottom)); }
   .overlay-panel { max-height: calc(100dvh - max(16px, env(safe-area-inset-top)) - max(16px, env(safe-area-inset-bottom))); overscroll-behavior: contain; padding: 20px; }
   .overlay-header { gap: 12px; }
