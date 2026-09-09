@@ -1,5 +1,4 @@
 .app-shell { min-height: 100vh; overflow-x: clip; }
-.mobile-stage-picker { display: none; }
 .hero-member, .team-credit button { padding: 0; border: 0; background: transparent; cursor: pointer; }
 .team-credit button { display: inline-flex; align-items: center; gap: 7px; min-height: 44px; color: #fff; font: inherit; text-transform: none; }
 .hero-member:focus-visible, .team-credit button:focus-visible { outline: 2px solid var(--ds-color-primary); outline-offset: 6px; border-radius: 8px; }
@@ -340,14 +339,14 @@ html[data-theme="light"] .hero-aurora {
   .intro-content .intro-logo-wrap, .intro-content .intro-overline, .intro-content .intro-presents { animation: none; }
 }
 
-/* Mobile navigation shares the header and reserves its own content space. */
+/* A dedicated right gutter keeps mobile navigation clear of the content. */
 @media (max-width: 600px) {
-  .app-shell .step-rail { display: none; }
+  .app-shell .step-rail { display: flex; position: fixed; top: 50%; right: max(2px, env(safe-area-inset-right)); left: auto; bottom: auto; flex-direction: column; gap: 0; width: 36px; padding: 0; border: 0; background: transparent; backdrop-filter: none; transform: translateY(-50%); }
+  .app-shell .step-dot { width: 36px; height: 40px; flex-shrink: 0; }
+  .app-shell .step-dot::before { inset: auto; top: 16px; left: 14px; width: 8px; height: 8px; }
   .site-header { height: auto; padding: 0; }
-  .mobile-stage-picker { display: block; margin: 4px 8px 0; pointer-events: auto; }
-  .mobile-stage-picker select { display: block; width: 100%; min-height: 44px; padding: 0 14px; border: 1px solid var(--ds-border-subtle); border-radius: 12px; background: var(--ds-bg-base); color: var(--ds-text-secondary); font: 600 .75rem/1.4 var(--ds-font-body); color-scheme: dark; }
-  html[data-theme="light"] .mobile-stage-picker select { color-scheme: light; }
-  .mobile-stage-picker select:focus-visible { outline: 2px solid var(--ds-color-primary); outline-offset: 2px; }
-  .header-progress-line { display: none; }
-  .app-shell .stage { padding-top: 142px; }
+  .app-shell .stage { padding-left: 20px; padding-right: calc(48px + env(safe-area-inset-right)); }
+  .app-shell .stage-nav { right: calc(48px + env(safe-area-inset-right)); }
+  .app-shell .scroll-cue { right: calc(48px + env(safe-area-inset-right)); }
+  .stage-hero .hero-copy h1 { font-size: clamp(2rem, 10.8vw, 4rem); }
 }

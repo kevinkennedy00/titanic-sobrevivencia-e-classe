@@ -710,12 +710,6 @@ function App() {
           }
           aria-hidden="true"
         />
-        <label className="mobile-stage-picker">
-          <span className="sr-only">Ir para etapa da apresentação</span>
-          <select value={active} onChange={(event) => navigate(Number(event.target.value))}>
-            {targets.map((target, index) => <option key={target} value={index}>{String(index + 1).padStart(2, "0")} · {targetLabels[index]}</option>)}
-          </select>
-        </label>
       </header>
       <aside className="step-rail" aria-label="Etapas da apresentação">
         {targets.map((target, index) => (
