@@ -82,29 +82,29 @@ type Presentation = {
 const number = new Intl.NumberFormat("pt-BR");
 const copy = {
   cauany: {
-    title: "Uma pergunta orienta toda a análise.",
+    title: "Antes dos percentuais, existem pessoas e registros.",
     summary:
-      "Antes de comparar grupos, definimos o recorte, os códigos e a qualidade da base.",
+      "A pergunta central nasce da base: cada registro liga a sobrevivência de uma pessoa à classe em que ela viajava.",
   },
   bruna: {
-    title: "A classe mais frequente também concentra a dispersão.",
+    title: "Entender a base é entender de onde essa história começa.",
     summary:
-      "Média, moda e mediana descrevem os códigos — com a cautela de que Pclass é uma variável ordinal.",
+      "As medidas mostram como os passageiros se distribuíam entre as classes antes de compararmos seus desfechos.",
   },
   samuel: {
-    title: "A sobrevivência foi minoritária na base.",
+    title: "Na base, sobreviver não foi o desfecho mais comum.",
     summary:
-      "A resposta binária revela o ponto de partida: 342 sobreviveram, 549 não sobreviveram.",
+      "Os 342 sobreviventes e 549 não sobreviventes revelam o cenário geral; a comparação por classe mostra como ele se reparte.",
   },
   nikson: {
-    title: "O denominador muda a leitura da história.",
+    title: "A proporção revela o que a contagem sozinha não mostra.",
     summary:
-      "Quando cada classe é comparada consigo mesma, a diferença entre 1ª e 3ª aparece com precisão.",
+      "Quando cada classe é comparada com o seu próprio total, a desigualdade observada entre os grupos aparece com precisão.",
   },
   kevin: {
-    title: "Estatística transforma registros em uma comparação interpretável.",
+    title: "Os dados tornam visível uma história que merece ser lida com cuidado.",
     summary:
-      "O resultado é forte, mas responsável: associação observada não demonstra causalidade sozinha.",
+      "Os cálculos evidenciam diferenças na base analisada; interpretá-las com responsabilidade exige não confundir associação com causa.",
   },
 };
 
@@ -820,9 +820,10 @@ function App() {
                 Como a sobrevivência se distribui entre as classes da passagem?
               </h2>
               <p>
-                Quando cada classe é comparada com seu próprio total, surge uma
-                diferença de <strong>{classMetric.gap_label}</strong> entre a 1ª
-                e a 3ª classe.
+                Por trás de cada barra há pessoas. Quando cada classe é
+                comparada com seu próprio total, os registros revelam uma
+                diferença de <strong>{classMetric.gap_label}</strong> entre a
+                1ª e a 3ª classe.
               </p>
             </div>
             <div
@@ -867,8 +868,8 @@ function App() {
             </div>
             <div className="question-handoff">
               <p>
-                Para entender essa diferença, começamos pela base e pelas
-                variáveis.
+                Para entender essa diferença, voltamos à base: quem são esses
+                registros, como foram classificados e o que cada cálculo mede.
               </p>
             </div>
           </div>
@@ -909,7 +910,7 @@ function App() {
               </div>
               <div className="dataset-overview ds-card">
                 <div className="panel-heading">
-                  <span>Qualidade da base</span>
+                  <span>A base por trás da história</span>
                   <Icon name="database" />
                 </div>
                 <div className="chip-grid">
@@ -935,8 +936,9 @@ function App() {
                   />
                 </div>
                 <p className="panel-note">
-                  Os dados foram importados do arquivo canônico e calculados
-                  novamente pela API.
+                  Cada número vem do arquivo canônico e é recalculado pela API:
+                  a interpretação só é possível porque o caminho até o dado é
+                  verificável.
                 </p>
               </div>
             </div>
@@ -958,7 +960,7 @@ function App() {
             <div className="bruna-layout">
               <div className="stats-table ds-panel ds-card">
                 <div className="panel-heading">
-                  <span>Medidas de posição</span>
+                  <span>Como a base se concentra</span>
                   <span className="panel-tag">Pclass · Survived</span>
                 </div>
                 <div className="table-head">
@@ -998,7 +1000,7 @@ function App() {
               </div>
               <div className="distribution-card ds-card">
                 <div className="panel-heading">
-                  <span>Distribuição por classe</span>
+                  <span>Quem ocupava cada classe</span>
                   <span className="panel-tag">
                     n = {overview.total_passengers}
                   </span>
@@ -1026,8 +1028,9 @@ function App() {
                   ))}
                 </div>
                 <p className="panel-note">
-                  A 3ª classe representa mais da metade dos registros:{" "}
-                  {distribution.rows[2].share_label}.
+                  A 3ª classe reúne mais da metade dos registros:{" "}
+                  {distribution.rows[2].share_label}. Esse é o contexto para
+                  ler as taxas de sobrevivência com justiça.
                 </p>
               </div>
             </div>
@@ -1094,8 +1097,8 @@ function App() {
             </div>
             <div className="samuel-bottom">
               <p>
-                O resultado geral é o nosso ponto de partida — ainda não explica
-                a diferença entre grupos.
+              O resultado geral mostra o desfecho da base, mas ainda não diz
+              como essa experiência se distribuiu entre os grupos.
               </p>
               <FormulaButton
                 formula={{
@@ -1126,7 +1129,7 @@ function App() {
             <div className="comparison-layout">
               <div className="comparison-chart ds-panel">
                 <div className="panel-heading">
-                  <span>Taxa de sobrevivência dentro de cada classe</span>
+                  <span>Sobrevivência dentro de cada classe</span>
                   <span className="panel-tag">clique para destacar</span>
                 </div>
                 <div className="class-rows">
@@ -1185,14 +1188,14 @@ function App() {
                     steps: rateSteps(classes[activeClass].survivors, classes[activeClass].total),
                     expression: classes[activeClass].formula,
                     explanation:
-                      "A taxa usa o total da própria classe como denominador. Assim, os grupos são comparados na mesma escala.",
+                      "A taxa usa o total da própria classe como denominador. Assim, comparamos a sobrevivência dentro da realidade de cada grupo, e não apenas contagens diferentes.",
                   }}
                   onOpen={openFormula}
                 />
               </aside>
             </div>
             <div className="distribution-strip">
-              <span>Distribuição da amostra</span>
+              <span>De onde vêm os grupos comparados</span>
               {distribution.rows.map((row: any) => (
                 <b key={row.class}>
                   {row.class}{" "}
@@ -1248,10 +1251,11 @@ function App() {
                 <article>
                   <span>03</span>
                   <div>
-                    <h3>Medidas e gráficos se complementam.</h3>
+                    <h3>Medidas e gráficos ajudam a ler a mesma história.</h3>
                     <p>
-                      Os números resumem os códigos; as distribuições e taxas
-                      mostram como os resultados se repartem.
+                      Os números organizam os registros; as distribuições e
+                      taxas mostram como sobrevivência e classe se encontram
+                      na base.
                     </p>
                   </div>
                 </article>
@@ -1262,8 +1266,9 @@ function App() {
                   <Icon name="info" />
                 </div>
                 <p>
-                  Sexo, idade e outras condições podem estar relacionados ao
-                  resultado e merecem novas análises.
+                  Sexo, idade e outras condições também podem estar ligados ao
+                  resultado. Esta análise descreve uma associação na base, não
+                  explica sozinha todas as causas dessa história.
                 </p>
                 <div className="method-lines">
                   <span>
