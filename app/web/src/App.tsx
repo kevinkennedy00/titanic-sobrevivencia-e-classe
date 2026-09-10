@@ -1419,35 +1419,32 @@ function App() {
                 <article>
                   <span>01</span>
                   <div>
-                    <h3>A sobrevivência foi minoritária.</h3>
+                    <h3>{number.format(survival.survived)} vidas por trás dos {survival.survival_rate_label}.</h3>
                     <p>
-                      {number.format(survival.survived)} de{" "}
-                      {number.format(overview.total_passengers)} passageiros
-                      sobreviveram: {survival.survival_rate_label} dos registros
-                      analisados.
+                      Dos {number.format(overview.total_passengers)} passageiros da base, {number.format(survival.survived)} sobreviveram.
+                      Quase 40% dos registros — cada um representando uma pessoa.
                     </p>
                   </div>
                 </article>
                 <article>
                   <span>02</span>
                   <div>
-                    <h3>As classes tiveram resultados diferentes.</h3>
+                    <h3>A sobrevivência foi diferente entre as classes.</h3>
                     <p>
                       {classes
                         .map((row) => `${row.rate_label} na ${row.class}`)
                         .join(", ")}
-                      .
+                      . A média por grupo revela diferenças que a contagem isolada não mostra.
                     </p>
                   </div>
                 </article>
                 <article>
                   <span>03</span>
                   <div>
-                    <h3>Medidas e gráficos ajudam a ler a mesma história.</h3>
+                    <h3>Os cálculos ajudam a compreender realidades.</h3>
                     <p>
-                      Os números organizam os registros; as distribuições e
-                      taxas mostram como sobrevivência e classe se encontram
-                      na base.
+                      Medidas e gráficos tornam padrões visíveis e ajudam a formular
+                      perguntas e orientar decisões, sem explicar sozinhos todas as causas.
                     </p>
                   </div>
                 </article>
