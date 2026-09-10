@@ -23,7 +23,35 @@ type Section = {
 };
 type Formula = { title: string; expression: string; steps: { title: string; text: string }[] };
 const decimal = (value: number) => value.toLocaleString("pt-BR", { maximumFractionDigits: 8 });
+const decimal4 = (value: number) => value.toLocaleString("pt-BR", { minimumFractionDigits: 4, maximumFractionDigits: 4 });
 const percentage = (value: number) => `${(value * 100).toLocaleString("pt-BR", { minimumFractionDigits: 1, maximumFractionDigits: 1 })}%`;
+function centralTendencySteps(survivors: number, total: number, rows: ClassRow[]) {
+  const deceased = total - survivors;
+  const survivedMean = survivors / total;
+  const survivedMode = survivors > deceased ? 1 : 0;
+  const midpoint = Math.floor(total / 2) + 1;
+  const classSum = rows.reduce((sum, row) => sum + row.pclass * row.total, 0);
+  const classMean = classSum / total;
+  const classMode = rows.reduce((mostFrequent, row) => row.total > mostFrequent.total ? row : mostFrequent);
+  let cumulative = 0;
+  const classMedian = rows.find((row) => {
+    cumulative += row.total;
+    return cumulative >= midpoint;
+  }) ?? rows[rows.length - 1];
+  const beforeMedianClass = rows
+    .filter((row) => row.pclass < classMedian.pclass)
+    .reduce((sum, row) => sum + row.total, 0);
+  return [
+    { title: "Fórmulas e símbolos", text: "Média = Σxᵢ / N; moda = valor com maior frequência; mediana = valor da posição central após ordenar os registros. N é o total de passageiros e xᵢ é o valor observado em Survived ou Pclass." },
+    { title: "Média de Survived", text: `Como Survived vale 0 ou 1, sua soma é o número de sobreviventes: Σxᵢ = ${survivors}. Média = ${survivors} / ${total} ≈ ${decimal4(survivedMean)}, equivalente a ${percentage(survivedMean)}.` },
+    { title: "Moda de Survived", text: `O valor 0 aparece ${deceased} vezes e o valor 1 aparece ${survivors} vezes. Como ${deceased} é a maior frequência, a moda é ${survivedMode} (não sobreviveu).` },
+    { title: "Mediana de Survived", text: `Com N = ${total}, a posição central é (N + 1) / 2 = ${midpoint}. Após ordenar os valores, as posições de 1 a ${deceased} são 0; portanto, a ${midpoint}ª posição vale 0 e a mediana é 0.` },
+    { title: "Média de Pclass", text: `Σ(fⱼxⱼ) = ${rows.map((row) => `${row.total} × ${row.pclass}`).join(" + ")} = ${classSum}. Média = ${classSum} / ${total} ≈ ${decimal4(classMean)}.` },
+    { title: "Moda de Pclass", text: rows.map((row) => `${row.pclass}ª classe: ${row.total} registros`).join("; ") + `. A maior frequência é ${classMode.total}; portanto, a moda é ${classMode.pclass} (3ª classe).` },
+    { title: "Mediana de Pclass", text: `Na ordenação por classe, os códigos anteriores ocupam até a posição ${beforeMedianClass}; a ${classMedian.pclass}ª classe vai da posição ${beforeMedianClass + 1} à ${beforeMedianClass + classMedian.total}. A ${midpoint}ª posição pertence a esse intervalo, então a mediana é ${classMedian.pclass} (3ª classe).` },
+    { title: "Interpretação responsável", text: "Em Survived, a média representa a proporção de sobreviventes. Em Pclass, a mediana 3 identifica uma categoria real: a 3ª classe. A média 2,3086 resume os códigos e não representa uma classe intermediária real nem distância social. Os decimais são arredondados somente para exibição; ≈ indica aproximação." },
+  ];
+}
 function rateSteps(survivors: number, total: number) {
   return [
     { title: "Fórmula e símbolos", text: "p = S / N; T = p × 100%. S é o número de sobreviventes; N é o total do grupo; p é a proporção e T é a taxa percentual." },
@@ -46,7 +74,8 @@ function variationSteps(rows: ClassRow[]) {
     { title: "Desvios quadráticos ponderados", text: `σ² = [${rows.map(row => `${row.total} × (${row.pclass} − ${sum}/${n})²`).join(" + ")}] / ${n}. As frequências incluem todos os registros, sem listar repetidamente cada código.` },
     { title: "Desenvolvimento da variância", text: `Pela identidade σ² = Σ(fⱼxⱼ²)/N − μ²: Σ(fⱼxⱼ²) = ${rows.map(row => `${row.total} × ${row.pclass}²`).join(" + ")} = ${squares}. Logo, σ² = ${squares}/${n} − (${sum}/${n})² ≈ ${decimal(variance)}. Dividimos por N, não por N − 1 (ddof = 0).` },
     { title: "Raiz e coeficiente de variação", text: `σ = √[${squares}/${n} − (${sum}/${n})²] ≈ ${decimal(Math.sqrt(variance))}. CV = {√[${squares}/${n} − (${sum}/${n})²] / (${sum}/${n})} × 100% ≈ ${decimal(Math.sqrt(variance) / mean * 100)}%.` },
-    { title: "Arredondamento e interpretação", text: `CV ≈ ${(Math.sqrt(variance) / mean * 100).toLocaleString("pt-BR", { maximumFractionDigits: 1 })}%. Os valores intermediários exibidos são aproximações; o cálculo não usa esses arredondamentos. Pclass é ordinal: o CV descreve seus códigos, não uma distância econômica ou social entre classes.` },
+    { title: "Divisor adotado", text: `Usamos N = ${n} (ddof = 0) para descrever integralmente esta base. Esses registros não correspondem a todas as pessoas a bordo. O divisor N − 1 pertence à estimativa amostral da variância, que não é o cálculo adotado aqui.` },
+    { title: "Arredondamento e limites do CV", text: `CV ≈ ${(Math.sqrt(variance) / mean * 100).toLocaleString("pt-BR", { maximumFractionDigits: 1 })}%. O cálculo mantém a precisão dos valores intermediários. Pclass é ordinal, sem zero absoluto nem distâncias sociais mensuradas: média, DP e CV são exercícios sobre os códigos 1, 2 e 3. O CV não tem a interpretação usual de dispersão relativa de uma grandeza; não mede desigualdade social nem permite classificar o grupo como homogêneo ou heterogêneo. Outra codificação pode alterar esses resultados.` },
   ];
 }
 function survivalVariationSteps(survivors: number, total: number) {
@@ -57,11 +86,12 @@ function survivalVariationSteps(survivors: number, total: number) {
   return [
     { title: "Fórmulas e símbolos", text: "μ = Σxᵢ / N = S / N; σ² = μ(1 − μ); σ = √σ²; CV = (σ / μ) × 100%. Como Survived é binária, cada xᵢ vale 0 ou 1; μ coincide com a taxa de sobrevivência." },
     { title: "Contagem dos registros", text: `S = ${survivors} sobreviventes; não sobreviventes = ${total - survivors}; N = ${survivors} + ${total - survivors} = ${total}.` },
-    { title: "Construção da média", text: `μ = S / N = ${survivors} / ${total} ≈ ${decimal(mean)} = ${percentage(mean)}. A média de 0 e 1 é a proporção de registros com Survived = 1.` },
-    { title: "Variância da variável binária", text: `σ² = μ(1 − μ) = ${decimal(mean)} × (1 − ${decimal(mean)}) ≈ ${decimal(variance)}.` },
-    { title: "Desvio padrão", text: `σ = √${decimal(variance)} ≈ ${decimal(std)}. O valor resume a variação dos dois desfechos, 0 e 1, na base.` },
-    { title: "Coeficiente de variação", text: `CV = (${decimal(std)} / ${decimal(mean)}) × 100% ≈ ${percentage(cv)}. Como a média é uma taxa, o CV descreve a dispersão relativa do indicador de sobrevivência.` },
-    { title: "Arredondamento e interpretação", text: `Os valores intermediários exibidos são aproximações; o cálculo não usa esses arredondamentos. DP e CV descrevem a distribuição do indicador Survived e não explicam, sozinhos, as causas do desfecho.` },
+    { title: "Construção da média", text: `μ = S / N = ${survivors} / ${total} ≈ ${decimal(mean)}, ou aproximadamente ${percentage(mean)}. A média de 0 e 1 é a proporção de registros com Survived = 1.` },
+    { title: "Desenvolvimento da variância", text: `σ² = [${total - survivors} × (0 − μ)² + ${survivors} × (1 − μ)²] / ${total}. Como xᵢ² = xᵢ para valores 0/1, σ² = μ − μ² = μ(1 − μ). Substituindo: σ² = (${survivors}/${total}) × (1 − ${survivors}/${total}) ≈ ${decimal(variance)}.` },
+    { title: "Divisor adotado", text: `Dividimos por N = ${total} (ddof = 0), descrevendo todos os registros desta base, não todas as pessoas a bordo. A fórmula μ(1 − μ) corresponde a essa variância populacional; a estimativa amostral com divisor N − 1 seria diferente.` },
+    { title: "Desvio padrão", text: `σ = √[(${survivors}/${total}) × (1 − ${survivors}/${total})] ≈ ${decimal(std)}. O valor está na escala do indicador 0/1; não é erro padrão nem margem de erro da taxa.` },
+    { title: "Coeficiente de variação", text: `CV = {√[(${survivors}/${total}) × (1 − ${survivors}/${total})] / (${survivors}/${total})} × 100% ≈ ${percentage(cv)}. O CV é a razão entre DP e média, expressa em porcentagem: pode ultrapassar 100% e não é probabilidade nem taxa de sobrevivência.` },
+    { title: "Arredondamento e interpretação", text: "Os valores intermediários exibidos são aproximações; o cálculo usa as frações originais. Para 0/1, CV = √[(1 − μ)/μ] × 100%: depende da própria proporção e da escolha de codificar sobrevivência como 1. Inverter 0 e 1 altera o CV. Ele não fornece uma evidência independente sobre as causas dos desfechos nem deve ser comparado diretamente ao CV dos códigos de classe." },
   ];
 }
 type ClassRow = {
@@ -89,6 +119,27 @@ type PassengerFilters = {
   survived: "" | "0" | "1";
   sex: "" | "female" | "male";
   name: string;
+};
+type ContextRow = {
+  label: string;
+  class?: string;
+  sex?: string;
+  pclass?: number;
+  survivors: number;
+  total: number;
+  rate: number;
+  rate_label: string;
+  formula: string;
+};
+type HumanContext = {
+  sex: ContextRow[];
+  age: {
+    known_total: number;
+    missing_total: number;
+    rows: ContextRow[];
+  };
+  minors_by_class: ContextRow[];
+  note: string;
 };
 const emptyPassengerFilters: PassengerFilters = {
   pclass: "",
@@ -454,6 +505,7 @@ function App() {
   );
   const [formula, setFormula] = useState<Formula | null>(null);
   const [explorerOpen, setExplorerOpen] = useState(false);
+  const [contextOpen, setContextOpen] = useState(false);
   const [qrOpen, setQrOpen] = useState(false);
   const [passengers, setPassengers] = useState<Passenger[]>([]);
   const [passengerPage, setPassengerPage] = useState(0);
@@ -578,7 +630,7 @@ function App() {
   }, [data, targets]);
   useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {
-      if (introVisible || formula || explorerOpen || qrOpen) return;
+      if (introVisible || formula || explorerOpen || contextOpen || qrOpen) return;
       const target = event.target as HTMLElement | null;
       const isEditable =
         target &&
@@ -607,7 +659,7 @@ function App() {
     };
     window.addEventListener("keydown", onKeyDown);
     return () => window.removeEventListener("keydown", onKeyDown);
-  }, [active, introVisible, formula, explorerOpen, qrOpen, targets]);
+  }, [active, introVisible, formula, explorerOpen, contextOpen, qrOpen, targets]);
 
   const openFormula = (item: Formula, event: MouseEvent<HTMLElement>) => {
     (event.currentTarget as HTMLElement).dataset.lastTrigger = "true";
@@ -693,6 +745,7 @@ function App() {
   const classMetric = data.metrics["survival-by-class"];
   const classes = classMetric.rows as ClassRow[];
   const central = data.metrics["central-tendency"];
+  const humanContext = data.metrics["human-context"] as HumanContext;
   const dispersion = data.metrics.dispersion;
   const activeSpeaker = active > 1 ? data.sections[active - 2] : undefined;
   const targetLabels = [
@@ -986,10 +1039,24 @@ function App() {
                   <span>{central.survived.median} · não sobreviveu</span>
                   <span>{central.pclass.median} · 3ª classe</span>
                 </div>
-                <p className="panel-note">
-                  O centro dos dados ajuda a contar o padrão mais frequente,
-                  mas não transforma uma pessoa em um valor médio.
-                </p>
+                <div className="stat-foot">
+                  <span>
+                    O centro dos dados ajuda a contar o padrão mais frequente,
+                    mas não transforma uma pessoa em um valor médio.
+                  </span>
+                  <FormulaButton
+                    formula={{
+                      title: "Média, moda e mediana",
+                      steps: centralTendencySteps(
+                        survival.survived,
+                        overview.total_passengers,
+                        classes,
+                      ),
+                      expression: `Survived: ${survival.survived} ÷ ${overview.total_passengers} ≈ ${central.survived.mean_label}; Pclass: média ≈ ${central.pclass.mean_label}, moda = ${central.pclass.mode}, mediana = ${central.pclass.median}`,
+                    }}
+                    onOpen={openFormula}
+                  />
+                </div>
               </div>
               <div className="central-context ds-card">
                 <div className="panel-heading">
@@ -1065,7 +1132,7 @@ function App() {
                     formula={{
                       title: "DP e CV da classe",
                       steps: variationSteps(classes),
-                      expression: `${dispersion.pclass.std_label} ÷ ${central.pclass.mean_label} × 100 = ${dispersion.pclass.cv_label}`,
+                      expression: `DP ≈ ${dispersion.pclass.std_label}; CV = (σ / μ) × 100% ≈ ${dispersion.pclass.cv_label}`,
                     }}
                     onOpen={openFormula}
                   />
@@ -1179,7 +1246,7 @@ function App() {
                 formula={{
                   title: "DP e CV da sobrevivência",
                   steps: survivalVariationSteps(survival.survived, overview.total_passengers),
-                  expression: `DP = ${dispersion.survived.std_label}; CV = ${dispersion.survived.cv_label}`,
+                  expression: `DP ≈ ${dispersion.survived.std_label}; CV ≈ ${dispersion.survived.cv_label}`,
                 }}
                 onOpen={openFormula}
               />
@@ -1261,7 +1328,7 @@ function App() {
                   formula={{
                     title: `Taxa da ${classes[activeClass].class}`,
                     steps: rateSteps(classes[activeClass].survivors, classes[activeClass].total),
-                    expression: classes[activeClass].formula,
+                    expression: `${classes[activeClass].survivors} ÷ ${classes[activeClass].total} × 100% ≈ ${classes[activeClass].rate_label}`,
                   }}
                   onOpen={openFormula}
                 />
@@ -1367,6 +1434,12 @@ function App() {
                 >
                   <Icon name="database" size={15} /> Explorar registros
                 </button>
+                <button
+                  className="ds-button ds-btn ds-button--ghost ds-btn--secondary"
+                  onClick={() => setContextOpen(true)}
+                >
+                  <Icon name="grid" size={15} /> Ver recortes por grupo
+                </button>
               </div>
             </div>
             <div className="team-credit" ref={creditsRef}>
@@ -1407,6 +1480,103 @@ function App() {
             <p id="qr-instructions">Aponte a câmera para o QR Code e abra a apresentação.</p>
             <QRCodeSVG value={PUBLIC_SITE_URL} size={560} level="M" marginSize={4} bgColor="#ffffff" fgColor="#000000" title="QR Code para o site Titanic — Sobrevivência e Classe" />
             <a href={PUBLIC_SITE_URL} target="_blank" rel="noopener noreferrer">titanic-sobrevivencia-e-classe.vercel.app</a>
+          </div>
+        </Overlay>
+      )}
+      {contextOpen && (
+        <Overlay
+          title="Recortes complementares"
+          labelledBy="context-overlay-title"
+          describedBy="context-overlay-description"
+          onClose={() => setContextOpen(false)}
+        >
+          <div className="context-modal">
+            <p id="context-overlay-description" className="context-modal-intro">
+              A média de <strong>Survived</strong> vira taxa quando calculada
+              dentro de cada grupo. Assim, a mesma medida aproxima números,
+              pessoas e o contexto social da viagem.
+            </p>
+            <section className="context-block" aria-labelledby="context-sex-title">
+              <div className="panel-heading">
+                <span id="context-sex-title">Sexo e sobrevivência</span>
+                <span className="panel-tag">média = taxa</span>
+              </div>
+              <div className="context-table-wrap">
+                <table className="context-table">
+                  <thead>
+                    <tr><th>Grupo</th><th>Sobreviveram</th><th>Registros</th><th>Taxa</th></tr>
+                  </thead>
+                  <tbody>
+                    {humanContext.sex.map((row) => (
+                      <tr key={row.sex}>
+                        <th scope="row">{row.label}</th>
+                        <td>{number.format(row.survivors)}</td>
+                        <td>{number.format(row.total)}</td>
+                        <td><strong>{row.rate_label}</strong></td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+              <p className="context-block-note">
+                Mulheres: {humanContext.sex[0].formula}. Homens: {humanContext.sex[1].formula}.
+              </p>
+            </section>
+            <section className="context-block" aria-labelledby="context-age-title">
+              <div className="panel-heading">
+                <span id="context-age-title">Idade registrada</span>
+                <span className="panel-tag">n = {number.format(humanContext.age.known_total)}</span>
+              </div>
+              <div className="context-table-wrap">
+                <table className="context-table">
+                  <thead>
+                    <tr><th>Grupo</th><th>Sobreviveram</th><th>Registros</th><th>Taxa</th></tr>
+                  </thead>
+                  <tbody>
+                    {humanContext.age.rows.map((row) => (
+                      <tr key={row.label}>
+                        <th scope="row">{row.label}</th>
+                        <td>{number.format(row.survivors)}</td>
+                        <td>{number.format(row.total)}</td>
+                        <td><strong>{row.rate_label}</strong></td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+              <p className="context-block-note">
+                A idade não foi informada em {number.format(humanContext.age.missing_total)} registros; por isso, este recorte usa somente as idades disponíveis.
+              </p>
+            </section>
+            <section className="context-block" aria-labelledby="context-class-title">
+              <div className="panel-heading">
+                <span id="context-class-title">Menores de 18 anos por classe</span>
+                <span className="panel-tag">mesmo denominador do grupo</span>
+              </div>
+              <div className="context-table-wrap">
+                <table className="context-table">
+                  <thead>
+                    <tr><th>Classe</th><th>Sobreviveram</th><th>Registros</th><th>Taxa</th></tr>
+                  </thead>
+                  <tbody>
+                    {humanContext.minors_by_class.map((row) => (
+                      <tr key={row.pclass}>
+                        <th scope="row">{row.class}</th>
+                        <td>{number.format(row.survivors)}</td>
+                        <td>{number.format(row.total)}</td>
+                        <td><strong>{row.rate_label}</strong></td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </section>
+            <p className="context-modal-note">
+              {humanContext.note} {" "}
+              Esses padrões dialogam com a prioridade histórica dada a mulheres
+              e crianças durante a evacuação. A base mostra associações entre
+              os grupos; ela não prova uma causa isolada para cada desfecho.
+            </p>
           </div>
         </Overlay>
       )}

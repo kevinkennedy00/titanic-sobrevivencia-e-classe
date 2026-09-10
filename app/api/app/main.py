@@ -158,6 +158,53 @@ def metric_payloads() -> dict[str, dict[str, Any]]:
     survived_mean = float(frame["Survived"].mean())
     survived_std = float(frame["Survived"].std(ddof=0))
 
+    sex_labels = {"female": "Mulheres", "male": "Homens"}
+    sex_summary = frame.groupby("Sex")["Survived"].agg(["sum", "count"])
+    sex_rows = [
+        {
+            "sex": sex,
+            "label": sex_labels[sex],
+            "survivors": int(sex_summary.loc[sex, "sum"]),
+            "total": int(sex_summary.loc[sex, "count"]),
+            "rate": round(float(sex_summary.loc[sex, "sum"] / sex_summary.loc[sex, "count"]), 6),
+            "rate_label": percentage(float(sex_summary.loc[sex, "sum"] / sex_summary.loc[sex, "count"])),
+            "formula": f"{int(sex_summary.loc[sex, 'sum'])} ÷ {int(sex_summary.loc[sex, 'count'])} × 100 = {percentage(float(sex_summary.loc[sex, 'sum'] / sex_summary.loc[sex, 'count']))}",
+        }
+        for sex in ("female", "male")
+    ]
+
+    age_known = frame.loc[frame["Age"].notna()].copy()
+    age_known["age_group"] = age_known["Age"].map(
+        lambda age: "Menores de 18 anos" if float(age) < 18 else "Adultos"
+    )
+    age_summary = age_known.groupby("age_group")["Survived"].agg(["sum", "count"])
+    age_rows = [
+        {
+            "label": label,
+            "survivors": int(age_summary.loc[label, "sum"]),
+            "total": int(age_summary.loc[label, "count"]),
+            "rate": round(float(age_summary.loc[label, "sum"] / age_summary.loc[label, "count"]), 6),
+            "rate_label": percentage(float(age_summary.loc[label, "sum"] / age_summary.loc[label, "count"])),
+            "formula": f"{int(age_summary.loc[label, 'sum'])} ÷ {int(age_summary.loc[label, 'count'])} × 100 = {percentage(float(age_summary.loc[label, 'sum'] / age_summary.loc[label, 'count']))}",
+        }
+        for label in ("Menores de 18 anos", "Adultos")
+    ]
+
+    minors = age_known.loc[age_known["Age"] < 18]
+    minor_class_summary = minors.groupby("Pclass")["Survived"].agg(["sum", "count"])
+    minor_class_rows = [
+        {
+            "class": f"{int(pclass)}ª classe",
+            "pclass": int(pclass),
+            "survivors": int(minor_class_summary.loc[pclass, "sum"]),
+            "total": int(minor_class_summary.loc[pclass, "count"]),
+            "rate": round(float(minor_class_summary.loc[pclass, "sum"] / minor_class_summary.loc[pclass, "count"]), 6),
+            "rate_label": percentage(float(minor_class_summary.loc[pclass, "sum"] / minor_class_summary.loc[pclass, "count"])),
+            "formula": f"{int(minor_class_summary.loc[pclass, 'sum'])} ÷ {int(minor_class_summary.loc[pclass, 'count'])} × 100 = {percentage(float(minor_class_summary.loc[pclass, 'sum'] / minor_class_summary.loc[pclass, 'count']))}",
+        }
+        for pclass in (1, 2, 3)
+    ]
+
     return {
         "overview": {
             "slug": "overview",
@@ -215,6 +262,18 @@ def metric_payloads() -> dict[str, dict[str, Any]]:
                 "median": float(frame["Pclass"].median()),
             },
             "note": "A média de Pclass resume códigos ordinais; não representa uma classe real.",
+        },
+        "human-context": {
+            "slug": "human-context",
+            "title": "Recortes complementares",
+            "sex": sex_rows,
+            "age": {
+                "known_total": int(len(age_known)),
+                "missing_total": int(frame["Age"].isna().sum()),
+                "rows": age_rows,
+            },
+            "minors_by_class": minor_class_rows,
+            "note": "As médias de Survived dentro de cada grupo são taxas descritivas. Os recortes ajudam a contextualizar a história, mas não isolam causas individuais.",
         },
         "dispersion": {
             "slug": "dispersion",
