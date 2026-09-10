@@ -1,6 +1,7 @@
 .app-shell { min-height: 100vh; overflow-x: clip; }
 .samuel-technical-actions { display: flex; flex-direction: column; align-items: flex-start; gap: 8px; }
-.samuel-technical-actions .formula-trigger { min-height: 0; padding: 0; font: 400 .68rem/1 var(--ds-font-mono); gap: 6px; text-align: left; text-transform: none; }
+.samuel-technical-actions .formula-trigger { min-height: 0; padding: 0; font: 400 .72rem/1 var(--ds-font-mono); gap: 6px; text-align: left; text-transform: none; }
+.stage-samuel .samuel-measures { font-size: .72rem; }
 .samuel-technical-actions .formula-icon { width: 12px; height: 12px; flex-shrink: 0; }
 .samuel-technical-actions .formula-icon svg { width: 9px; height: 9px; }
 .comparison-legend { display: grid; gap: 8px; margin: 22px 0 0; padding: 0; list-style: none; color: var(--ds-text-secondary); font: 400 .75rem/1.5 var(--ds-font-body); }
