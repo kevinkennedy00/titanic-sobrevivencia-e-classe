@@ -938,30 +938,32 @@ function App() {
                 <div className="chip-grid">
                   <MetricChip
                     value={number.format(overview.total_passengers)}
-                    label="passageiros"
+                    label="registros na base"
                     tone="blue"
                   />
                   <MetricChip
                     value={String(overview.columns)}
-                    label="colunas"
+                    label="informações por registro"
                     tone="purple"
                   />
                   <MetricChip
                     value={String(overview.variables_in_focus)}
-                    label="em foco"
+                    label="variáveis da análise"
                     tone="teal"
                   />
                   <MetricChip
                     value={String(overview.missing_in_focus)}
-                    label="ausências"
+                    label="lacunas nestas variáveis"
                     tone="green"
                   />
                 </div>
                 <p className="panel-note">
-                  Antes de virar média, taxa ou gráfico, cada número representa
-                  uma pessoa registrada na viagem. A origem e o tratamento
-                  verificáveis da base permitem comparar as classes com
-                  responsabilidade.
+                  Os 12 campos dão contexto a cada registro. Para responder à
+                  pergunta central, cruzamos sobrevivência e classe; sexo,
+                  idade, tarifa e embarque lembram que essa relação não explica
+                  uma história inteira. Como as duas variáveis estão completas,
+                  todos os {number.format(overview.total_passengers)} registros
+                  entram no cálculo.
                 </p>
                 <button
                   className="ds-button ds-btn ds-button--ghost ds-btn--secondary"
