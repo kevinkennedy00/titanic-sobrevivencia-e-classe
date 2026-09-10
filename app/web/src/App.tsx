@@ -561,7 +561,6 @@ function App() {
   );
   const navigate = (next: number) => {
     const bounded = Math.max(0, Math.min(next, targets.length - 1));
-    setActive(bounded);
     const reducedMotion = window.matchMedia(
       "(prefers-reduced-motion: reduce)",
     ).matches;
@@ -725,7 +724,7 @@ function App() {
       <main className="system-state">
         <Icon name="database" size={32} />
         <h1>Não foi possível conectar à base.</h1>
-        <p>Confirme se o Docker está em execução e tente novamente.</p>
+        <p>Verifique sua conexão e tente novamente.</p>
         <button className="ds-button ds-btn" onClick={retryPresentation}>
           Tentar novamente
         </button>
@@ -1450,7 +1449,7 @@ function App() {
               <span>Apresentação por</span>
               {data.sections.map((section) => (
                 <button type="button" key={section.slug} aria-label={`Ir para ${section.speaker}`} onClick={() => navigate(targets.indexOf(section.slug))}>
-                  <img src={section.photo} alt="" />
+                    <span className={`credit-avatar ${section.slug === "nikson" ? "credit-avatar--nikson" : ""}`}><img src={section.photo} alt="" /></span>
                   <b>{section.speaker.split(" ")[0]}</b>
                 </button>
               ))}
