@@ -167,9 +167,9 @@ const copy = {
       "As medidas de posição resumem os registros sem apagar as pessoas: mostram o centro da experiência observada antes de comparar os grupos.",
   },
   bruna: {
-    title: "A classe se espalha entre três posições na base.",
+    title: "Como os passageiros se distribuíam entre as classes?",
     summary:
-      "O desvio padrão e o coeficiente de variação descrevem como os registros se distribuem entre 1ª, 2ª e 3ª classe — o retrato numérico de uma divisão social, não uma medida de pessoas.",
+      "A 3ª classe reunia mais da metade dos passageiros da base. A média, o DP e o CV ajudam a resumir essa distribuição.",
   },
   samuel: {
     title: "A sobrevivência também tem um centro e uma dispersão.",
@@ -755,7 +755,6 @@ function App() {
   ];
   const classChartLabel = `Taxas de sobrevivência por classe: ${classes.map((row) => `${row.class}, ${row.rate_label}`).join("; ")}.`;
   const distributionChartLabel = `Distribuição de passageiros por classe: ${distribution.rows.map((row: any) => `${row.class}, ${row.count} passageiros, ${row.share_label}`).join("; ")}.`;
-  const brunaDispersionReading = `O desvio padrão e o CV mostram que os passageiros não se concentravam em apenas um código de classe. Eles ajudam a contextualizar a diversidade de posições na base; como Pclass é ordinal, porém, não medem uma distância social entre pessoas. ${dispersion.note}`;
   const samuelRateReading = `A proporção considera todos os ${number.format(overview.total_passengers)} registros da base: sobreviventes divididos pelo total, multiplicado por 100. O DP e o CV descrevem como os dois desfechos se distribuem; como Survived é 0/1, eles ajudam a ler o cenário geral, mas não explicam sozinhos a história de cada pessoa.`;
   const niksonRateReading = "A taxa usa o total da própria classe como denominador. Assim, comparamos a sobrevivência dentro da realidade de cada grupo, e não apenas contagens diferentes.";
   return (
@@ -1095,38 +1094,37 @@ function App() {
             <div className="bruna-layout">
               <div className="stats-table ds-panel ds-card">
                 <div className="panel-heading">
-                  <span>Como os códigos se espalham</span>
+                  <span>O que cada medida mostra</span>
                   <span className="panel-tag">Pclass · ddof = 0</span>
                 </div>
-                <p className="human-reading human-reading--intro">
-                  O desvio padrão e o CV mostram como os registros se
-                  distribuem entre 1ª, 2ª e 3ª classe. Eles ajudam a enxergar a
-                  diversidade da base, mas não medem uma distância social entre
-                  pessoas.
-                </p>
                 <div className="table-head">
                   <span>Medida</span>
                   <span>Resultado</span>
-                  <span>O que resume</span>
+                  <span>Como interpretar</span>
                 </div>
                 <div className="table-row">
                   <b>Média</b>
                   <span>{central.pclass.mean_label}</span>
-                  <span>centro dos códigos</span>
+                  <span>Ponto de referência dos códigos 1, 2 e 3</span>
                 </div>
                 <div className="table-row">
-                  <b>DP</b>
+                  <b>Desvio padrão <span className="table-sigla">(DP)</span></b>
                   <span>{dispersion.pclass.std_label}</span>
-                  <span>espalhamento absoluto</span>
+                  <span>Afastamento típico dos códigos em relação à média</span>
                 </div>
                 <div className="table-row">
-                  <b>CV</b>
+                  <b>Coeficiente de variação <span className="table-sigla">(CV)</span></b>
                   <span>{dispersion.pclass.cv_label}</span>
-                  <span>espalhamento relativo</span>
+                  <span>O DP equivale a {dispersion.pclass.cv_label} da média</span>
                 </div>
+                <p className="bruna-measure-note">
+                  <b>DP:</b> quanto os valores se espalham. <b>CV:</b> quanto esse
+                  espalhamento representa em relação à média.
+                </p>
                 <div className="stat-foot">
                   <span>
-                    Pclass é ordinal: leia os códigos com cautela.
+                    Os códigos indicam classes ordenadas; os cálculos não medem a
+                    distância social entre elas.
                   </span>
                   <FormulaButton
                     formula={{
@@ -1168,14 +1166,17 @@ function App() {
                   ))}
                 </div>
                 <p className="panel-note">
-                  A 3ª classe reúne mais da metade dos registros:{" "}
-                  {distribution.rows[2].share_label}. Esse é o contexto para
-                  ler as taxas de sobrevivência com justiça.
+                  Dos {overview.total_passengers} passageiros, {distribution.rows[2].count} estavam na
+                  3ª classe: {distribution.rows[2].share_label} da base. Como cada
+                  classe tinha um tamanho diferente, a comparação da sobrevivência
+                  considera o total de cada grupo.
                 </p>
               </div>
             </div>
             <p className="interpretation">
-              <Icon name="info" size={16} /> {brunaDispersionReading}
+              <Icon name="info" size={16} /> No filme, essa divisão aparece nos
+              espaços ocupados pelos passageiros. Na base, aparece na classe
+              registrada para cada pessoa.
             </p>
           </div>
           <StageNav

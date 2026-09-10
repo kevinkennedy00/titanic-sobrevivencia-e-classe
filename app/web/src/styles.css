@@ -809,3 +809,109 @@ html[data-theme="light"] .hero-aurora {
 
   .app-shell .stage-nav { margin-top: 28px; }
 }
+
+/* Shared reading axes for the three presentation sections. The intro and its
+   content grid intentionally use the same columns so the presenter can scan
+   from the summary straight into the evidence below. */
+@media (min-width: 901px) {
+  .stage-bruna .section-intro {
+    grid-template-columns: minmax(0, 1.08fr) minmax(390px, .92fr);
+    column-gap: clamp(28px, 3.5vw, 54px);
+  }
+
+  .stage-bruna .table-head,
+  .stage-bruna .table-row {
+    grid-template-columns: minmax(145px, 1.15fr) minmax(90px, .75fr) minmax(180px, 1.3fr);
+  }
+
+  .stage-nikson .section-intro {
+    grid-template-columns: minmax(0, 1.08fr) minmax(360px, .92fr);
+    column-gap: clamp(28px, 3.5vw, 54px);
+  }
+
+  .stage-kevin .section-intro {
+    grid-template-columns: minmax(0, 1.1fr) minmax(0, .9fr);
+    column-gap: clamp(28px, 3.5vw, 54px);
+  }
+}
+
+/* At tablet and phone widths the reading path becomes one column. This
+   removes the desktop summary offset that previously left Nikson and Kevin
+   visibly detached from their lower panels. */
+@media (max-width: 900px) {
+  .stage-bruna .section-intro,
+  .stage-nikson .section-intro,
+  .stage-kevin .section-intro {
+    display: block;
+    width: 100%;
+    margin-bottom: 28px;
+  }
+
+  .stage-bruna .section-intro .mono-label,
+  .stage-nikson .section-intro .mono-label,
+  .stage-kevin .section-intro .mono-label {
+    margin-bottom: 16px;
+  }
+
+  .stage-bruna .section-intro h2,
+  .stage-nikson .section-intro h2,
+  .stage-kevin .section-intro h2 {
+    max-width: 100%;
+    margin-bottom: 16px;
+  }
+
+  .stage-bruna .section-intro > p:last-child,
+  .stage-nikson .section-intro > p:last-child,
+  .stage-kevin .section-intro > p:last-child {
+    max-width: 62ch;
+    margin: 0;
+  }
+}
+
+.table-sigla {
+  color: var(--ds-text-muted);
+  font-size: .88em;
+  font-weight: 400;
+  white-space: nowrap;
+}
+
+.bruna-measure-note {
+  margin: 16px 0 0;
+  color: var(--ds-text-secondary);
+  font: 400 .72rem/1.45 var(--ds-font-body);
+}
+
+.bruna-measure-note b {
+  color: var(--ds-text-primary);
+  font-weight: 600;
+}
+
+@media (max-width: 600px) {
+  .stage-bruna .section-intro,
+  .stage-nikson .section-intro,
+  .stage-kevin .section-intro {
+    margin-bottom: 24px;
+  }
+
+  .stage-bruna .section-intro .mono-label,
+  .stage-nikson .section-intro .mono-label,
+  .stage-kevin .section-intro .mono-label {
+    margin-bottom: 12px;
+  }
+
+  .stage-bruna .section-intro h2,
+  .stage-nikson .section-intro h2,
+  .stage-kevin .section-intro h2 {
+    margin-bottom: 12px;
+  }
+
+  .stage-bruna .table-head,
+  .stage-bruna .table-row {
+    grid-template-columns: .72fr 1.12fr .94fr;
+  }
+
+  .stage-bruna .bruna-measure-note {
+    margin-top: 13px;
+    font-size: .68rem;
+  }
+}
