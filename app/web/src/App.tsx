@@ -992,11 +992,18 @@ function App() {
                       title: "Coeficiente de variação",
                       steps: variationSteps(classes),
                       expression: `${dispersion.pclass.std_label} ÷ ${central.pclass.mean_label} × 100 = ${dispersion.pclass.cv_label}`,
-                      explanation: dispersion.note,
+                      explanation: `O desvio padrão e o CV mostram que os passageiros não se concentravam em apenas um código de classe. Eles ajudam a contextualizar a diversidade de posições na base; como Pclass é ordinal, porém, não medem uma distância social entre pessoas. ${dispersion.note}`,
                     }}
                     onOpen={openFormula}
                   />
                 </div>
+                <p className="human-reading">
+                  Para a sobrevivência, a média vira taxa: ela mostra a parcela de
+                  pessoas que sobreviveu. Moda e mediana indicam que o desfecho
+                  mais comum foi não sobreviver. Para a classe, moda e mediana
+                  mostram que a experiência mais recorrente na base era a 3ª
+                  classe; a média apenas resume os códigos.
+                </p>
               </div>
               <div className="distribution-card ds-card">
                 <div className="panel-heading">
@@ -1105,7 +1112,7 @@ function App() {
                   title: "Taxa geral de sobrevivência",
                   steps: rateSteps(classes.reduce((sum, row) => sum + row.survivors, 0), classes.reduce((sum, row) => sum + row.total, 0)),
                   expression: survival.formula,
-                  explanation: `A proporção considera todos os ${number.format(overview.total_passengers)} registros da base: sobreviventes divididos pelo total, multiplicado por 100.`,
+                  explanation: `A proporção considera todos os ${number.format(overview.total_passengers)} registros da base: sobreviventes divididos pelo total, multiplicado por 100. Na história geral destes registros, ela mostra que sobreviver não foi o desfecho mais frequente — mas ainda não explica por que os grupos tiveram resultados diferentes.`,
                 }}
                 onOpen={openFormula}
               />
@@ -1331,7 +1338,7 @@ function App() {
       )}
       {formula && (
         <Overlay
-          title="Como foi calculado"
+          title="Como foi calculado e o que revela"
           labelledBy="formula-overlay-title"
           onClose={() => setFormula(null)}
         >
@@ -1341,7 +1348,10 @@ function App() {
             <ol className="calculation-steps">
               {formula.steps.map(step => <li key={step.title}><h4>{step.title}</h4><p>{step.text}</p></li>)}
             </ol>
-            <p>{formula.explanation}</p>
+            <div className="formula-reading">
+              <h4>O que este cálculo revela</h4>
+              <p>{formula.explanation}</p>
+            </div>
           </div>
         </Overlay>
       )}
