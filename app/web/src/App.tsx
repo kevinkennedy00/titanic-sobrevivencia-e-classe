@@ -969,7 +969,7 @@ function App() {
               </div>
               <p>
                 Cada linha situa uma pessoa na viagem. Os demais campos dão
-                contexto; <strong>Survived</strong> e <strong>Pclass</strong>
+                contexto; <strong>Survived</strong> e <strong>Pclass</strong>{" "}
                 formam o recorte que vamos calcular e comparar.
               </p>
               <a
@@ -1210,14 +1210,15 @@ function App() {
                 </div>
               </div>
               <div className="survival-compare">
-                <div className="split-track">
-                  <span
-                    style={
-                      {
-                        "--share": `${survival.survival_rate * 100}%`,
-                      } as CSSProperties
-                    }
-                  />
+                <div
+                  className="split-track"
+                  style={
+                    {
+                      "--share": `${survival.survival_rate * 100}%`,
+                    } as CSSProperties
+                  }
+                >
+                  <span />
                   <i />
                 </div>
                 <div className="split-labels">
