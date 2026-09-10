@@ -628,6 +628,44 @@ function App() {
     };
   }, [data, targets]);
   useEffect(() => {
+    if (!data || !sectionReady) return;
+    const motionPreference = window.matchMedia("(prefers-reduced-motion: reduce)");
+    const stages = targets.slice(1)
+      .map((id) => document.getElementById(id))
+      .filter((node): node is HTMLElement => node !== null);
+    const onArrival: IntersectionObserverCallback = (entries) => {
+      for (const entry of entries) {
+        entry.target.closest(".stage")?.classList.toggle(
+          "is-arriving", entry.isIntersecting && !motionPreference.matches,
+        );
+      }
+    };
+    let observer: IntersectionObserver;
+    const observeHeadings = () => {
+      observer?.disconnect();
+      // Pixel margins follow viewport height on desktop and portrait phones.
+      observer = new IntersectionObserver(onArrival, {
+        rootMargin: `0px 0px -${Math.round(window.innerHeight * 0.65)}px 0px`, threshold: 0,
+      });
+      for (const stage of stages) {
+        const heading = stage.querySelector(".section-intro, .opening-question-copy");
+        if (heading) observer.observe(heading);
+      }
+    };
+    observeHeadings();
+    window.addEventListener("resize", observeHeadings);
+    const clearMotion = () => {
+      if (motionPreference.matches) stages.forEach((stage) => stage.classList.remove("is-arriving"));
+    };
+    motionPreference.addEventListener("change", clearMotion);
+    return () => {
+      observer.disconnect();
+      window.removeEventListener("resize", observeHeadings);
+      motionPreference.removeEventListener("change", clearMotion);
+      stages.forEach((stage) => stage.classList.remove("is-arriving"));
+    };
+  }, [data, targets, sectionReady]);
+  useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {
       if (introVisible || formula || explorerOpen || contextOpen || qrOpen) return;
       const target = event.target as HTMLElement | null;

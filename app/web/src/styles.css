@@ -24,25 +24,25 @@
 .calculation-steps h4 { margin: 0 0 8px; color: var(--ds-text-primary); font-size: 1rem; }
 .calculation-steps p { margin: 0; line-height: 1.7; overflow-wrap: anywhere; font-variant-numeric: tabular-nums; }
 /* A bounded entrance on each presentation step; resting content stays visible. */
-.stage.is-presenting > .speaker-mark,
-.stage.is-presenting > .stage-inner > *,
-.stage.is-presenting > .question-stage-inner > * {
-  animation: section-arrive 250ms var(--ds-ease-smooth-out) backwards;
+.stage.is-arriving > .speaker-mark,
+.stage.is-arriving > .stage-inner > *,
+.stage.is-arriving > .question-stage-inner > * {
+  animation: section-arrive var(--ds-duration-slow, 400ms) var(--ds-ease-smooth-out) backwards;
 }
-.stage.is-presenting > .stage-inner > :first-child,
-.stage.is-presenting > .question-stage-inner > :first-child { animation-delay: 0ms; }
-.stage.is-presenting > .stage-inner > :nth-child(2),
-.stage.is-presenting > .question-stage-inner > :nth-child(2) { animation-delay: 40ms; }
-.stage.is-presenting > .stage-inner > :nth-child(n+3),
-.stage.is-presenting > .question-stage-inner > :nth-child(n+3) { animation-delay: 80ms; }
+.stage.is-arriving > .stage-inner > :first-child,
+.stage.is-arriving > .question-stage-inner > :first-child { animation-delay: 0ms; }
+.stage.is-arriving > .stage-inner > :nth-child(2),
+.stage.is-arriving > .question-stage-inner > :nth-child(2) { animation-delay: 40ms; }
+.stage.is-arriving > .stage-inner > :nth-child(n+3),
+.stage.is-arriving > .question-stage-inner > :nth-child(n+3) { animation-delay: 80ms; }
 @keyframes section-arrive {
-  from { opacity: .85; transform: translateY(8px); }
+  from { opacity: .65; transform: translateY(12px); }
   to { opacity: 1; transform: translateY(0); }
 }
 @media (prefers-reduced-motion: reduce) {
-  .stage.is-presenting > .speaker-mark,
-  .stage.is-presenting > .stage-inner > *,
-  .stage.is-presenting > .question-stage-inner > * { animation: none; }
+  .stage.is-arriving > .speaker-mark,
+  .stage.is-arriving > .stage-inner > *,
+  .stage.is-arriving > .question-stage-inner > * { animation: none; }
 }
 /* Reserve space for the speaker before each section's heading. */
 .stage > .speaker-mark { position: relative; top: auto; left: auto; width: min(1220px, 100%); margin: 0 auto 32px; align-items: center; }
