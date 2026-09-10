@@ -23,26 +23,22 @@
 .calculation-steps li::marker { color: var(--ds-color-primary); }
 .calculation-steps h4 { margin: 0 0 8px; color: var(--ds-text-primary); font-size: 1rem; }
 .calculation-steps p { margin: 0; line-height: 1.7; overflow-wrap: anywhere; font-variant-numeric: tabular-nums; }
-/* A bounded entrance on each presentation step; resting content stays visible. */
-.stage.is-arriving > .speaker-mark,
-.stage.is-arriving > .stage-inner > *,
-.stage.is-arriving > .question-stage-inner > * {
-  animation: section-arrive var(--ds-duration-slow, 400ms) var(--ds-ease-smooth-out) backwards;
+/* Progressive enhancement: only offscreen blocks are armed, once per visit. */
+.section-reveal {
+  opacity: 1;
+  transform: translateY(0);
+  transition: opacity .8s ease, transform .8s ease;
 }
-.stage.is-arriving > .stage-inner > :first-child,
-.stage.is-arriving > .question-stage-inner > :first-child { animation-delay: 0ms; }
-.stage.is-arriving > .stage-inner > :nth-child(2),
-.stage.is-arriving > .question-stage-inner > :nth-child(2) { animation-delay: 40ms; }
-.stage.is-arriving > .stage-inner > :nth-child(n+3),
-.stage.is-arriving > .question-stage-inner > :nth-child(n+3) { animation-delay: 80ms; }
-@keyframes section-arrive {
-  from { opacity: .65; transform: translateY(12px); }
-  to { opacity: 1; transform: translateY(0); }
+.section-reveal[data-reveal="pending"] {
+  opacity: 0;
+  transform: translateY(30px);
+}
+@media (max-width: 600px) {
+  .section-reveal[data-reveal="pending"] { transform: translateY(20px); }
 }
 @media (prefers-reduced-motion: reduce) {
-  .stage.is-arriving > .speaker-mark,
-  .stage.is-arriving > .stage-inner > *,
-  .stage.is-arriving > .question-stage-inner > * { animation: none; }
+  .section-reveal,
+  .section-reveal[data-reveal="pending"] { opacity: 1; transform: none; transition: none; }
 }
 /* Reserve space for the speaker before each section's heading. */
 .stage > .speaker-mark { position: relative; top: auto; left: auto; width: min(1220px, 100%); margin: 0 auto 32px; align-items: center; }

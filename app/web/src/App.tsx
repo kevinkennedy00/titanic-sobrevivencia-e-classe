@@ -630,39 +630,55 @@ function App() {
   useEffect(() => {
     if (!data || !sectionReady) return;
     const motionPreference = window.matchMedia("(prefers-reduced-motion: reduce)");
+    if (motionPreference.matches || !("IntersectionObserver" in window)) return;
     const stages = targets.slice(1)
       .map((id) => document.getElementById(id))
       .filter((node): node is HTMLElement => node !== null);
-    const onArrival: IntersectionObserverCallback = (entries) => {
+    const blockSelector = window.matchMedia("(max-width: 600px)").matches
+      ? ":scope > .speaker-mark, :scope > .stage-inner > *, :scope > .question-stage-inner > *"
+      : ":scope > .speaker-mark, :scope > .stage-inner, :scope > .question-stage-inner";
+    const blocks = stages.flatMap((stage) => Array.from(stage.querySelectorAll<HTMLElement>(blockSelector)));
+    const reveal = (block: HTMLElement, immediate = false) => {
+      if (immediate) block.classList.remove("section-reveal");
+      block.dataset.reveal = "shown";
+      observer.unobserve(block);
+    };
+    const observer = new IntersectionObserver((entries) => {
       for (const entry of entries) {
-        entry.target.closest(".stage")?.classList.toggle(
-          "is-arriving", entry.isIntersecting && !motionPreference.matches,
-        );
+        if (entry.isIntersecting) reveal(entry.target as HTMLElement);
       }
-    };
-    let observer: IntersectionObserver;
-    const observeHeadings = () => {
-      observer?.disconnect();
-      // Pixel margins follow viewport height on desktop and portrait phones.
-      observer = new IntersectionObserver(onArrival, {
-        rootMargin: `0px 0px -${Math.round(window.innerHeight * 0.65)}px 0px`, threshold: 0,
-      });
-      for (const stage of stages) {
-        const heading = stage.querySelector(".section-intro, .opening-question-copy");
-        if (heading) observer.observe(heading);
+    // A zero threshold also admits tall mobile cards, without waiting for a ratio.
+    }, { rootMargin: "0px 0px -50px 0px", threshold: 0 });
+    for (const block of blocks) {
+      const stageBounds = block.closest(".stage")!.getBoundingClientRect();
+      // Restoring a saved section must never make its existing content disappear.
+      if (stageBounds.top < window.innerHeight && stageBounds.bottom > 0) {
+        block.dataset.reveal = "shown";
+      } else {
+        block.dataset.reveal = "pending";
+        block.classList.add("section-reveal");
+        observer.observe(block);
       }
-    };
-    observeHeadings();
-    window.addEventListener("resize", observeHeadings);
+    }
     const clearMotion = () => {
-      if (motionPreference.matches) stages.forEach((stage) => stage.classList.remove("is-arriving"));
+      if (motionPreference.matches) blocks.forEach((block) => reveal(block, true));
     };
+    const showFocusedBlock = (event: FocusEvent) => {
+      const target = event.target;
+      if (!(target instanceof Element)) return;
+      const block = target.closest<HTMLElement>(".section-reveal");
+      if (block) reveal(block, true);
+    };
+    document.addEventListener("focusin", showFocusedBlock);
     motionPreference.addEventListener("change", clearMotion);
     return () => {
       observer.disconnect();
-      window.removeEventListener("resize", observeHeadings);
+      document.removeEventListener("focusin", showFocusedBlock);
       motionPreference.removeEventListener("change", clearMotion);
-      stages.forEach((stage) => stage.classList.remove("is-arriving"));
+      blocks.forEach((block) => {
+        block.classList.remove("section-reveal");
+        delete block.dataset.reveal;
+      });
     };
   }, [data, targets, sectionReady]);
   useEffect(() => {
