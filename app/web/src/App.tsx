@@ -972,8 +972,8 @@ function App() {
               </div>
             </div>
             <p className="cauany-handoff">
-              Bruna parte daqui: a distribuição entre as classes é o ponto de
-              partida para interpretar a sobrevivência.
+              A distribuição entre as classes é o ponto de partida para
+              interpretar as diferenças de sobrevivência.
             </p>
           </div>
           <StageNav
