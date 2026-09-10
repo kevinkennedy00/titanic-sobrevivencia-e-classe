@@ -971,10 +971,6 @@ function App() {
                 </button>
               </div>
             </div>
-            <p className="cauany-handoff">
-              A distribuição entre as classes é o ponto de partida para
-              interpretar as diferenças de sobrevivência.
-            </p>
           </div>
           <StageNav
             previous={() => navigate(1)}
