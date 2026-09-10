@@ -355,6 +355,42 @@ html[data-theme="light"] .hero-aurora {
   .intro-content .intro-logo-wrap, .intro-content .intro-overline, .intro-content .intro-presents { animation: none; }
 }
 
+/* Bruna's data reading is intentionally compact on a projector-sized viewport. */
+@media (min-width: 901px) {
+  .stage-bruna { padding-top: 108px; padding-bottom: 78px; }
+  .stage-bruna > .speaker-mark { margin-bottom: 26px; }
+  .stage-bruna .section-intro {
+    display: grid;
+    grid-template-columns: minmax(0, 1.15fr) minmax(300px, .85fr);
+    align-items: end;
+    column-gap: clamp(36px, 5vw, 76px);
+    row-gap: 32px;
+    width: 100%;
+    margin-bottom: clamp(28px, 3vw, 40px);
+  }
+  .stage-bruna .section-intro .mono-label { grid-column: 1 / -1; margin-bottom: 0; }
+  .stage-bruna .section-intro h2 {
+    max-width: 18ch;
+    margin-bottom: 0;
+    font-size: clamp(3rem, 3.7vw, 4.5rem);
+    line-height: .88;
+    text-wrap: balance;
+  }
+  .stage-bruna .section-intro > p:last-child { max-width: 37ch; margin-bottom: 3px; }
+  .stage-bruna .bruna-layout {
+    grid-template-columns: minmax(0, 1.08fr) minmax(390px, .92fr);
+    gap: clamp(28px, 3.5vw, 54px);
+  }
+  .stage-bruna .stats-table, .stage-bruna .distribution-card { padding: 22px 26px; }
+  .stage-bruna .table-head { margin-top: 19px; }
+  .stage-bruna .table-head, .stage-bruna .table-row { padding-block: 11px; }
+  .stage-bruna .stat-foot { padding-block: 14px; }
+  .stage-bruna .human-reading { margin-top: 14px; font-size: .79rem; line-height: 1.48; }
+  .stage-bruna .vertical-chart { height: 184px; margin-top: 22px; }
+  .stage-bruna .panel-note { margin-top: 16px; }
+  .stage-bruna .interpretation { margin-top: 16px; }
+}
+
 /* A dedicated right gutter keeps mobile navigation clear of the content. */
 @media (max-width: 600px) {
   .app-shell .step-rail { display: flex; position: fixed; top: 50%; right: max(2px, env(safe-area-inset-right)); left: auto; bottom: auto; flex-direction: column; gap: 0; width: 36px; padding: 0; border: 0; background: transparent; backdrop-filter: none; transform: translateY(-50%); }
