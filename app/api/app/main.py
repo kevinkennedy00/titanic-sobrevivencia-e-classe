@@ -77,10 +77,10 @@ def decimal(value: float, digits: int = 4) -> str:
 
 def presentation_sections() -> list[dict[str, Any]]:
     team = [
-        ("cauany", "Cauany Nunes", "Introdução e medidas de posição", "CAUANY NUNES.jpg"),
-        ("bruna", "Bruna Xavier", "Dispersão e distribuição da classe", "BRUNA XAVIER.jpg"),
-        ("samuel", "Samuel Soares", "Sobrevivência geral", "SAMUEL SOARES.jpg"),
-        ("nikson", "Nikson Gabriel", "Análise conjunta", "NIKSON GABRIEL.jpg"),
+        ("cauany", "Cauany Nunes", "Medidas de posição", "CAUANY NUNES.jpg"),
+        ("bruna", "Bruna Xavier", "Dispersão da classe", "BRUNA XAVIER.jpg"),
+        ("samuel", "Samuel Soares", "Dispersão da sobrevivência", "SAMUEL SOARES.jpg"),
+        ("nikson", "Nikson Gabriel", "Sobrevivência por classe", "NIKSON GABRIEL.jpg"),
         ("kevin", "Kevin Kennedy", "Conclusões e limites", "KEVIN KENNEDY.jpg"),
     ]
     colors = ["ivory", "mist", "navy", "ink", "night"]

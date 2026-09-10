@@ -22,6 +22,7 @@ type Section = {
 };
 type Formula = { title: string; expression: string; steps: { title: string; text: string }[] };
 const decimal = (value: number) => value.toLocaleString("pt-BR", { maximumFractionDigits: 8 });
+const percentage = (value: number) => `${(value * 100).toLocaleString("pt-BR", { minimumFractionDigits: 1, maximumFractionDigits: 1 })}%`;
 function rateSteps(survivors: number, total: number) {
   return [
     { title: "Fórmula e símbolos", text: "p = S / N; T = p × 100%. S é o número de sobreviventes; N é o total do grupo; p é a proporção e T é a taxa percentual." },
@@ -45,6 +46,21 @@ function variationSteps(rows: ClassRow[]) {
     { title: "Desenvolvimento da variância", text: `Pela identidade σ² = Σ(fⱼxⱼ²)/N − μ²: Σ(fⱼxⱼ²) = ${rows.map(row => `${row.total} × ${row.pclass}²`).join(" + ")} = ${squares}. Logo, σ² = ${squares}/${n} − (${sum}/${n})² ≈ ${decimal(variance)}. Dividimos por N, não por N − 1 (ddof = 0).` },
     { title: "Raiz e coeficiente de variação", text: `σ = √[${squares}/${n} − (${sum}/${n})²] ≈ ${decimal(Math.sqrt(variance))}. CV = {√[${squares}/${n} − (${sum}/${n})²] / (${sum}/${n})} × 100% ≈ ${decimal(Math.sqrt(variance) / mean * 100)}%.` },
     { title: "Arredondamento e interpretação", text: `CV ≈ ${(Math.sqrt(variance) / mean * 100).toLocaleString("pt-BR", { maximumFractionDigits: 1 })}%. Os valores intermediários exibidos são aproximações; o cálculo não usa esses arredondamentos. Pclass é ordinal: o CV descreve seus códigos, não uma distância econômica ou social entre classes.` },
+  ];
+}
+function survivalVariationSteps(survivors: number, total: number) {
+  const mean = survivors / total;
+  const variance = mean * (1 - mean);
+  const std = Math.sqrt(variance);
+  const cv = std / mean;
+  return [
+    { title: "Fórmulas e símbolos", text: "μ = Σxᵢ / N = S / N; σ² = μ(1 − μ); σ = √σ²; CV = (σ / μ) × 100%. Como Survived é binária, cada xᵢ vale 0 ou 1; μ coincide com a taxa de sobrevivência." },
+    { title: "Contagem dos registros", text: `S = ${survivors} sobreviventes; não sobreviventes = ${total - survivors}; N = ${survivors} + ${total - survivors} = ${total}.` },
+    { title: "Construção da média", text: `μ = S / N = ${survivors} / ${total} ≈ ${decimal(mean)} = ${percentage(mean)}. A média de 0 e 1 é a proporção de registros com Survived = 1.` },
+    { title: "Variância da variável binária", text: `σ² = μ(1 − μ) = ${decimal(mean)} × (1 − ${decimal(mean)}) ≈ ${decimal(variance)}.` },
+    { title: "Desvio padrão", text: `σ = √${decimal(variance)} ≈ ${decimal(std)}. O valor resume a variação dos dois desfechos, 0 e 1, na base.` },
+    { title: "Coeficiente de variação", text: `CV = (${decimal(std)} / ${decimal(mean)}) × 100% ≈ ${percentage(cv)}. Como a média é uma taxa, o CV descreve a dispersão relativa do indicador de sobrevivência.` },
+    { title: "Arredondamento e interpretação", text: `Os valores intermediários exibidos são aproximações; o cálculo não usa esses arredondamentos. DP e CV descrevem a distribuição do indicador Survived e não explicam, sozinhos, as causas do desfecho.` },
   ];
 }
 type ClassRow = {
@@ -96,17 +112,17 @@ const copy = {
   cauany: {
     title: "Antes dos percentuais, existem pessoas e registros.",
     summary:
-      "Para que os números contem uma história responsável, precisamos saber de quem são esses registros e como foram organizados.",
+      "As medidas de posição resumem os registros sem apagar as pessoas: mostram o centro da experiência observada antes de comparar os grupos.",
   },
   bruna: {
-    title: "Entender a base é entender de onde essa história começa.",
+    title: "A classe se espalha entre três posições na base.",
     summary:
-      "As medidas mostram como os passageiros se distribuíam entre as classes antes de compararmos seus desfechos.",
+      "O desvio padrão e o coeficiente de variação descrevem como os registros se distribuem entre 1ª, 2ª e 3ª classe — o retrato numérico de uma divisão social, não uma medida de pessoas.",
   },
   samuel: {
-    title: "Na base, sobreviver não foi o desfecho mais comum.",
+    title: "A sobrevivência também tem um centro e uma dispersão.",
     summary:
-      "Os 342 sobreviventes e 549 não sobreviventes revelam o cenário geral; a comparação por classe mostra como ele se reparte.",
+      "A média de uma variável 0/1 vira taxa; o desvio padrão e o CV mostram como os dois desfechos se distribuem na base.",
   },
   nikson: {
     title: "A proporção revela o que a contagem sozinha não mostra.",
@@ -685,9 +701,8 @@ function App() {
   ];
   const classChartLabel = `Taxas de sobrevivência por classe: ${classes.map((row) => `${row.class}, ${row.rate_label}`).join("; ")}.`;
   const distributionChartLabel = `Distribuição de passageiros por classe: ${distribution.rows.map((row: any) => `${row.class}, ${row.count} passageiros, ${row.share_label}`).join("; ")}.`;
-  const brunaCentralReading = `A média olha para o conjunto: ${central.survived.mean_label} dos ${number.format(overview.total_passengers)} registros representam sobrevivência. Moda e mediana mostram o que mais se repetiu — não sobreviver e viajar na 3ª classe — sem reduzir cada pessoa a um código.`;
   const brunaDispersionReading = `O desvio padrão e o CV mostram que os passageiros não se concentravam em apenas um código de classe. Eles ajudam a contextualizar a diversidade de posições na base; como Pclass é ordinal, porém, não medem uma distância social entre pessoas. ${dispersion.note}`;
-  const samuelRateReading = `A proporção considera todos os ${number.format(overview.total_passengers)} registros da base: sobreviventes divididos pelo total, multiplicado por 100. Na história geral destes registros, ela mostra que sobreviver não foi o desfecho mais frequente — mas ainda não explica por que os grupos tiveram resultados diferentes.`;
+  const samuelRateReading = `A proporção considera todos os ${number.format(overview.total_passengers)} registros da base: sobreviventes divididos pelo total, multiplicado por 100. O DP e o CV descrevem como os dois desfechos se distribuem; como Survived é 0/1, eles ajudam a ler o cenário geral, mas não explicam sozinhos a história de cada pessoa.`;
   const niksonRateReading = "A taxa usa o total da própria classe como denominador. Assim, comparamos a sobrevivência dentro da realidade de cada grupo, e não apenas contagens diferentes.";
   return (
     <div className="app-shell">
@@ -888,11 +903,29 @@ function App() {
                 ))}
               </div>
             </div>
-            <div className="question-handoff">
+            <div className="opening-base ds-card">
+              <div className="panel-heading">
+                <span>A base que sustenta a comparação</span>
+                <Icon name="database" />
+              </div>
+              <div className="opening-base-metrics">
+                <span><b>{number.format(overview.total_passengers)}</b> registros observados</span>
+                <span><b>{overview.columns}</b> informações por registro</span>
+                <span><b>{overview.variables_in_focus}</b> variáveis da pergunta</span>
+                <span><b>{overview.missing_in_focus}</b> lacunas no recorte</span>
+              </div>
               <p>
-                Para entender essa diferença, voltamos à base: quem são esses
-                registros, como foram classificados e o que cada cálculo mede.
+                Cada linha situa uma pessoa na viagem. Os demais campos dão
+                contexto; <strong>Survived</strong> e <strong>Pclass</strong>
+                formam o recorte que vamos calcular e comparar.
               </p>
+              <small className="opening-base-source">Fonte: {data.source}</small>
+              <button
+                className="ds-button ds-btn ds-button--ghost ds-btn--secondary"
+                onClick={openExplorer}
+              >
+                <Icon name="database" size={15} /> Abrir registros da base
+              </button>
             </div>
           </div>
           <StageNav
@@ -909,93 +942,20 @@ function App() {
           <SpeakerMark section={data.sections[0]} />
           <div className="stage-inner">
             <SectionIntro
-              label="01 · DEFINIÇÃO DO RECORTE"
+              label="01 · MEDIDAS DE POSIÇÃO"
               title={copy.cauany.title}
               summary={copy.cauany.summary}
             />
-            <div className="question-layout">
-              <div className="research-question">
-                <span className="question-mark">?</span>
-                <p>Questão de pesquisa</p>
-                <h3>
-                  Como a sobrevivência se distribui entre as classes da
-                  passagem?
-                </h3>
-                <div className="variable-list">
-                  <span>
-                    <b>Survived</b> 0 = não · 1 = sim
-                  </span>
-                  <span>
-                    <b>Pclass</b> 1ª · 2ª · 3ª classe
-                  </span>
-                </div>
-              </div>
-              <div className="dataset-overview ds-card">
-                <div className="panel-heading">
-                  <span>A base por trás da história</span>
-                  <Icon name="database" />
-                </div>
-                <div className="chip-grid">
-                  <MetricChip
-                    value={number.format(overview.total_passengers)}
-                    label="registros na base"
-                    tone="blue"
-                  />
-                  <MetricChip
-                    value={String(overview.columns)}
-                    label="informações por registro"
-                    tone="purple"
-                  />
-                  <MetricChip
-                    value={String(overview.variables_in_focus)}
-                    label="variáveis da análise"
-                    tone="teal"
-                  />
-                  <MetricChip
-                    value={String(overview.missing_in_focus)}
-                    label="lacunas nestas variáveis"
-                    tone="green"
-                  />
-                </div>
-                <p className="panel-note">
-                  Os 12 campos dão contexto a cada registro. Para responder à
-                  pergunta central, cruzamos sobrevivência e classe; sexo,
-                  idade, tarifa e embarque lembram que essa relação não explica
-                  uma história inteira. Como as duas variáveis estão completas,
-                  todos os {number.format(overview.total_passengers)} registros
-                  entram no cálculo.
-                </p>
-                <button
-                  className="ds-button ds-btn ds-button--ghost ds-btn--secondary"
-                  onClick={openExplorer}
-                >
-                  <Icon name="database" size={15} /> Abrir registros da base
-                </button>
-              </div>
-            </div>
-          </div>
-          <StageNav
-            previous={() => navigate(1)}
-            next={() => navigate(3)}
-            label="Abrir medidas"
-          />
-        </section>
-        <section id="bruna" data-step="3" className={`stage stage-bruna ${active === 3 ? "is-presenting" : ""}`}>
-          <SpeakerMark section={data.sections[1]} />
-          <div className="stage-inner">
-            <SectionIntro
-              label="02 · TENDÊNCIA CENTRAL E DISPERSÃO"
-              title={copy.bruna.title}
-              summary={copy.bruna.summary}
-            />
-            <div className="bruna-layout">
+            <div className="cauany-central-layout">
               <div className="stats-table ds-panel ds-card">
                 <div className="panel-heading">
-                  <span>Como a base se concentra</span>
-                  <span className="panel-tag">Pclass · Survived</span>
+                  <span>O centro dos registros</span>
+                  <span className="panel-tag">Survived · Pclass</span>
                 </div>
                 <p className="human-reading human-reading--intro">
-                  {brunaCentralReading}
+                  A média, a moda e a mediana organizam a base em torno de um
+                  centro. Em <strong>Survived</strong>, a média vira taxa; em
+                  <strong> Pclass</strong>, ela resume códigos de classe.
                 </p>
                 <div className="table-head">
                   <span>Medida</span>
@@ -1017,13 +977,84 @@ function App() {
                   <span>{central.survived.median} · não sobreviveu</span>
                   <span>{central.pclass.median} · 3ª classe</span>
                 </div>
+                <p className="panel-note">
+                  O centro dos dados ajuda a contar o padrão mais frequente,
+                  mas não transforma uma pessoa em um valor médio.
+                </p>
+              </div>
+              <div className="central-context ds-card">
+                <div className="panel-heading">
+                  <span>Como ler cada medida</span>
+                  <Icon name="info" />
+                </div>
+                <div className="central-key">
+                  <b>Média</b>
+                  <p>Em 0 e 1, representa a proporção de pessoas que sobreviveram.</p>
+                </div>
+                <div className="central-key">
+                  <b>Moda</b>
+                  <p>Mostra o resultado e a classe que mais se repetem na base.</p>
+                </div>
+                <div className="central-key">
+                  <b>Mediana</b>
+                  <p>Divide os registros ordenados e revela o ponto central observado.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+          <StageNav
+            previous={() => navigate(1)}
+            next={() => navigate(3)}
+            label="Ver dispersão da classe"
+          />
+        </section>
+        <section id="bruna" data-step="3" className={`stage stage-bruna ${active === 3 ? "is-presenting" : ""}`}>
+          <SpeakerMark section={data.sections[1]} />
+          <div className="stage-inner">
+            <SectionIntro
+              label="02 · DISPERSÃO DA CLASSE"
+              title={copy.bruna.title}
+              summary={copy.bruna.summary}
+            />
+            <div className="bruna-layout">
+              <div className="stats-table ds-panel ds-card">
+                <div className="panel-heading">
+                  <span>Como os códigos se espalham</span>
+                  <span className="panel-tag">Pclass · ddof = 0</span>
+                </div>
+                <p className="human-reading human-reading--intro">
+                  O desvio padrão e o CV mostram como os registros se
+                  distribuem entre 1ª, 2ª e 3ª classe. Eles ajudam a enxergar a
+                  diversidade da base, mas não medem uma distância social entre
+                  pessoas.
+                </p>
+                <div className="table-head">
+                  <span>Medida</span>
+                  <span>Resultado</span>
+                  <span>O que resume</span>
+                </div>
+                <div className="table-row">
+                  <b>Média</b>
+                  <span>{central.pclass.mean_label}</span>
+                  <span>centro dos códigos</span>
+                </div>
+                <div className="table-row">
+                  <b>DP</b>
+                  <span>{dispersion.pclass.std_label}</span>
+                  <span>espalhamento absoluto</span>
+                </div>
+                <div className="table-row">
+                  <b>CV</b>
+                  <span>{dispersion.pclass.cv_label}</span>
+                  <span>espalhamento relativo</span>
+                </div>
                 <div className="stat-foot">
                   <span>
-                    Desvio padrão de classe <b>{dispersion.pclass.std_label}</b>
+                    Pclass é ordinal: leia os códigos com cautela.
                   </span>
                   <FormulaButton
                     formula={{
-                      title: "Coeficiente de variação",
+                      title: "DP e CV da classe",
                       steps: variationSteps(classes),
                       expression: `${dispersion.pclass.std_label} ÷ ${central.pclass.mean_label} × 100 = ${dispersion.pclass.cv_label}`,
                     }}
@@ -1074,7 +1105,7 @@ function App() {
           <StageNav
             previous={() => navigate(2)}
             next={() => navigate(4)}
-            label="Ver sobrevivência geral"
+            label="Ver dispersão da sobrevivência"
           />
         </section>
         <section
@@ -1087,7 +1118,7 @@ function App() {
           <div className="stage-inner">
             <SectionIntro
               light
-              label="03 · RESULTADO GERAL"
+              label="03 · DISPERSÃO DA SOBREVIVÊNCIA"
               title={copy.samuel.title}
               summary={copy.samuel.summary}
             />
@@ -1131,11 +1162,15 @@ function App() {
               <p>
                 {samuelRateReading}
               </p>
+              <div className="samuel-measures" aria-label="Medidas de dispersão da sobrevivência">
+                <span><b>DP</b> {dispersion.survived.std_label}</span>
+                <span><b>CV</b> {dispersion.survived.cv_label}</span>
+              </div>
               <FormulaButton
                 formula={{
-                  title: "Taxa geral de sobrevivência",
-                  steps: rateSteps(classes.reduce((sum, row) => sum + row.survivors, 0), classes.reduce((sum, row) => sum + row.total, 0)),
-                  expression: survival.formula,
+                  title: "DP e CV da sobrevivência",
+                  steps: survivalVariationSteps(survival.survived, overview.total_passengers),
+                  expression: `DP = ${dispersion.survived.std_label}; CV = ${dispersion.survived.cv_label}`,
                 }}
                 onOpen={openFormula}
               />
