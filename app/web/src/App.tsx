@@ -517,6 +517,8 @@ function App() {
   const [passengerLoading, setPassengerLoading] = useState(false);
   const [passengerError, setPassengerError] = useState(false);
   const [activeClass, setActiveClass] = useState(0);
+  const [hoveredClass, setHoveredClass] = useState<number | null>(null);
+  const displayedClass = hoveredClass ?? activeClass;
   const [presentationAttempt, setPresentationAttempt] = useState(0);
   const [introVisible, setIntroVisible] = useState(savedSection === "hero");
   const restoredSection = useRef(false);
@@ -1349,16 +1351,19 @@ function App() {
                   <span>Sobrevivência dentro de cada classe</span>
                   <span className="panel-tag">clique para destacar</span>
                 </div>
-                <div className="class-rows">
+                <div className="class-rows" onPointerLeave={() => setHoveredClass(null)}>
                   {classes.map((row, index) => (
                     <button
                       className={
-                        activeClass === index
+                        displayedClass === index
                           ? "class-row is-selected"
                           : "class-row"
                       }
                       key={row.class}
                       onClick={() => setActiveClass(index)}
+                      onPointerEnter={(event) => {
+                        if (event.pointerType === "mouse") setHoveredClass(index);
+                      }}
                       aria-pressed={activeClass === index}
                     >
                       <span className={`class-index class-index--${index + 1}`}>
@@ -1393,15 +1398,15 @@ function App() {
                 <p>entre a 1ª e a 3ª classe, antes do arredondamento.</p>
                 <div className="finding-selected">
                   <span>Classe destacada</span>
-                  <b>{classes[activeClass].class}</b>
-                  <em>{classes[activeClass].formula}</em>
+                  <b>{classes[displayedClass].class}</b>
+                  <em>{classes[displayedClass].formula}</em>
                 </div>
                 <p className="finding-reading">{niksonRateReading}</p>
                 <FormulaButton
                   formula={{
-                    title: `Taxa da ${classes[activeClass].class}`,
-                    steps: rateSteps(classes[activeClass].survivors, classes[activeClass].total),
-                    expression: `${classes[activeClass].survivors} ÷ ${classes[activeClass].total} × 100% ≈ ${classes[activeClass].rate_label}`,
+                    title: `Taxa da ${classes[displayedClass].class}`,
+                    steps: rateSteps(classes[displayedClass].survivors, classes[displayedClass].total),
+                    expression: `${classes[displayedClass].survivors} ÷ ${classes[displayedClass].total} × 100% ≈ ${classes[displayedClass].rate_label}`,
                   }}
                   onOpen={openFormula}
                 />
