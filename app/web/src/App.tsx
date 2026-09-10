@@ -687,7 +687,7 @@ function App() {
             onClick={() => navigate(0)}
             aria-label="Voltar ao início"
           >
-            <span className="brand-mark brand-mark--image"><img src="/design-system/icone-toolbar.png" alt="" width="27" height="27" /></span>
+            <span className="brand-mark brand-mark--image"><img src="/design-system/icone-toolbar-crop.png" alt="" width="34" height="34" /></span>
             <span>TITANIC / 1912</span>
           </button>
           <div className="header-course">{data.course}</div>
