@@ -1428,18 +1428,20 @@ function App() {
                     <b>Python/Pandas · desvio padrão populacional (ddof = 0)</b>
                   </span>
                 </div>
-                <button
-                  className="ds-button ds-btn ds-button--ghost ds-btn--secondary"
-                  onClick={openExplorer}
-                >
-                  <Icon name="database" size={15} /> Explorar registros
-                </button>
-                <button
-                  className="ds-button ds-btn ds-button--ghost ds-btn--secondary"
-                  onClick={() => setContextOpen(true)}
-                >
-                  <Icon name="grid" size={15} /> Ver recortes por grupo
-                </button>
+                <div className="method-panel-actions">
+                  <button
+                    className="ds-button ds-btn ds-button--ghost ds-btn--secondary"
+                    onClick={openExplorer}
+                  >
+                    <Icon name="database" size={15} /> Explorar registros
+                  </button>
+                  <button
+                    className="ds-button ds-btn ds-button--ghost ds-btn--secondary"
+                    onClick={() => setContextOpen(true)}
+                  >
+                    <Icon name="grid" size={15} /> Ver recortes por grupo
+                  </button>
+                </div>
               </div>
             </div>
             <div className="team-credit" ref={creditsRef}>
