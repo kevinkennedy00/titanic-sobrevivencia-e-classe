@@ -67,6 +67,18 @@ type Passenger = {
   fare: number;
   embarked: string | null;
 };
+type PassengerFilters = {
+  pclass: "" | "1" | "2" | "3";
+  survived: "" | "0" | "1";
+  sex: "" | "female" | "male";
+  name: string;
+};
+const emptyPassengerFilters: PassengerFilters = {
+  pclass: "",
+  survived: "",
+  sex: "",
+  name: "",
+};
 type Presentation = {
   title: string;
   subtitle: string;
@@ -84,7 +96,7 @@ const copy = {
   cauany: {
     title: "Antes dos percentuais, existem pessoas e registros.",
     summary:
-      "A pergunta central nasce da base: cada registro liga a sobrevivência de uma pessoa à classe em que ela viajava.",
+      "Para que os números contem uma história responsável, precisamos saber de quem são esses registros e como foram organizados.",
   },
   bruna: {
     title: "Entender a base é entender de onde essa história começa.",
@@ -255,7 +267,7 @@ function FormulaButton({
       <span className="formula-icon">
         <Icon name="info" size={15} />
       </span>
-      <span>Ver cálculo</span>
+      <span>Ver cálculo técnico</span>
     </button>
   );
 }
@@ -429,6 +441,8 @@ function App() {
   const [passengers, setPassengers] = useState<Passenger[]>([]);
   const [passengerPage, setPassengerPage] = useState(0);
   const [passengerTotal, setPassengerTotal] = useState(0);
+  const [passengerFilters, setPassengerFilters] =
+    useState<PassengerFilters>(emptyPassengerFilters);
   const [passengerLoading, setPassengerLoading] = useState(false);
   const [passengerError, setPassengerError] = useState(false);
   const [activeClass, setActiveClass] = useState(0);
@@ -582,17 +596,27 @@ function App() {
     (event.currentTarget as HTMLElement).dataset.lastTrigger = "true";
     setFormula(item);
   };
-  const loadPassengers = async (page: number) => {
+  const loadPassengers = async (
+    page: number,
+    filters: PassengerFilters = passengerFilters,
+  ) => {
     passengerAbortRef.current?.abort();
     const controller = new AbortController();
     passengerAbortRef.current = controller;
     setPassengerLoading(true);
     setPassengerError(false);
     try {
-      const response = await fetch(
-        `/api/passengers?offset=${page * 25}&limit=25`,
-        { signal: controller.signal },
-      );
+      const params = new URLSearchParams({
+        offset: String(page * 25),
+        limit: "25",
+      });
+      if (filters.pclass) params.set("pclass", filters.pclass);
+      if (filters.survived) params.set("survived", filters.survived);
+      if (filters.sex) params.set("sex", filters.sex);
+      if (filters.name.trim()) params.set("name", filters.name.trim());
+      const response = await fetch(`/api/passengers?${params.toString()}`, {
+        signal: controller.signal,
+      });
       if (!response.ok) throw new Error("passengers");
       const payload = await response.json();
       if (passengerAbortRef.current === controller) {
@@ -794,12 +818,6 @@ function App() {
                 >
                   <Icon name="play" size={15} /> Conhecer a análise
                 </button>
-                <button
-                  className="ds-button ds-btn ds-button--ghost ds-btn--secondary"
-                  onClick={openExplorer}
-                >
-                  <Icon name="database" size={15} /> Explorar a base
-                </button>
               </div>
               </div>
             </div>
@@ -936,12 +954,23 @@ function App() {
                   />
                 </div>
                 <p className="panel-note">
-                  Cada número vem do arquivo canônico e é recalculado pela API:
-                  a interpretação só é possível porque o caminho até o dado é
-                  verificável.
+                  Antes de virar média, taxa ou gráfico, cada número representa
+                  uma pessoa registrada na viagem. A origem e o tratamento
+                  verificáveis da base permitem comparar as classes com
+                  responsabilidade.
                 </p>
+                <button
+                  className="ds-button ds-btn ds-button--ghost ds-btn--secondary"
+                  onClick={openExplorer}
+                >
+                  <Icon name="database" size={15} /> Abrir registros da base
+                </button>
               </div>
             </div>
+            <p className="cauany-handoff">
+              Bruna parte daqui: a distribuição entre as classes é o ponto de
+              partida para interpretar a sobrevivência.
+            </p>
           </div>
           <StageNav
             previous={() => navigate(1)}
@@ -963,6 +992,12 @@ function App() {
                   <span>Como a base se concentra</span>
                   <span className="panel-tag">Pclass · Survived</span>
                 </div>
+                <p className="human-reading human-reading--intro">
+                  Os registros mostram que sobreviver não foi o resultado mais
+                  comum. Para a classe, moda e mediana apontam a 3ª como a
+                  experiência mais recorrente; a média apenas resume os
+                  códigos.
+                </p>
                 <div className="table-head">
                   <span>Medida</span>
                   <span>Sobrevivência</span>
@@ -997,13 +1032,6 @@ function App() {
                     onOpen={openFormula}
                   />
                 </div>
-                <p className="human-reading">
-                  Para a sobrevivência, a média vira taxa: ela mostra a parcela de
-                  pessoas que sobreviveu. Moda e mediana indicam que o desfecho
-                  mais comum foi não sobreviver. Para a classe, moda e mediana
-                  mostram que a experiência mais recorrente na base era a 3ª
-                  classe; a média apenas resume os códigos.
-                </p>
               </div>
               <div className="distribution-card ds-card">
                 <div className="panel-heading">
@@ -1338,7 +1366,7 @@ function App() {
       )}
       {formula && (
         <Overlay
-          title="Como foi calculado e o que revela"
+          title="Memória técnica do cálculo"
           labelledBy="formula-overlay-title"
           onClose={() => setFormula(null)}
         >
@@ -1348,10 +1376,6 @@ function App() {
             <ol className="calculation-steps">
               {formula.steps.map(step => <li key={step.title}><h4>{step.title}</h4><p>{step.text}</p></li>)}
             </ol>
-            <div className="formula-reading">
-              <h4>O que este cálculo revela</h4>
-              <p>{formula.explanation}</p>
-            </div>
           </div>
         </Overlay>
       )}
@@ -1364,9 +1388,96 @@ function App() {
         >
           <div className="explorer-body">
             <p id="explorer-dialog-description" className="explorer-intro">
-              Uma janela auditável com os primeiros registros reais usados pelos
-              cálculos. Página {passengerPage + 1} de {passengerPageCount}.
+              Consulte e filtre os registros reais usados nos cálculos. Foram
+              encontrados {number.format(passengerTotal)} registros. Página{" "}
+              {passengerPage + 1} de {passengerPageCount}.
             </p>
+            <form
+              className="explorer-filters"
+              onSubmit={(event) => {
+                event.preventDefault();
+                void loadPassengers(0);
+              }}
+            >
+              <label>
+                <span>Classe</span>
+                <select
+                  value={passengerFilters.pclass}
+                  onChange={(event) =>
+                    setPassengerFilters((filters) => ({
+                      ...filters,
+                      pclass: event.target.value as PassengerFilters["pclass"],
+                    }))
+                  }
+                >
+                  <option value="">Todas</option>
+                  <option value="1">1ª classe</option>
+                  <option value="2">2ª classe</option>
+                  <option value="3">3ª classe</option>
+                </select>
+              </label>
+              <label>
+                <span>Resultado</span>
+                <select
+                  value={passengerFilters.survived}
+                  onChange={(event) =>
+                    setPassengerFilters((filters) => ({
+                      ...filters,
+                      survived: event.target.value as PassengerFilters["survived"],
+                    }))
+                  }
+                >
+                  <option value="">Todos</option>
+                  <option value="1">Sobreviveu</option>
+                  <option value="0">Não sobreviveu</option>
+                </select>
+              </label>
+              <label>
+                <span>Sexo</span>
+                <select
+                  value={passengerFilters.sex}
+                  onChange={(event) =>
+                    setPassengerFilters((filters) => ({
+                      ...filters,
+                      sex: event.target.value as PassengerFilters["sex"],
+                    }))
+                  }
+                >
+                  <option value="">Todos</option>
+                  <option value="female">Feminino</option>
+                  <option value="male">Masculino</option>
+                </select>
+              </label>
+              <label className="explorer-filter-search">
+                <span>Nome</span>
+                <input
+                  type="search"
+                  value={passengerFilters.name}
+                  onChange={(event) =>
+                    setPassengerFilters((filters) => ({
+                      ...filters,
+                      name: event.target.value,
+                    }))
+                  }
+                  placeholder="Buscar passageiro"
+                />
+              </label>
+              <div className="explorer-filter-actions">
+                <button className="ds-button ds-btn ds-button--quiet" type="submit">
+                  Aplicar filtros
+                </button>
+                <button
+                  className="ds-button ds-btn ds-button--quiet"
+                  type="button"
+                  onClick={() => {
+                    setPassengerFilters(emptyPassengerFilters);
+                    void loadPassengers(0, emptyPassengerFilters);
+                  }}
+                >
+                  Limpar
+                </button>
+              </div>
+            </form>
             <p className="sr-only" aria-live="polite" role="status">
               {passengerLoading
                 ? "Carregando registros"

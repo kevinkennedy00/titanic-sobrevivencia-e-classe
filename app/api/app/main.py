@@ -328,12 +328,31 @@ def metric(slug: str, session: Session = Depends(get_session)) -> dict[str, Any]
 def passengers(
     offset: int = Query(0, ge=0),
     limit: int = Query(25, ge=1, le=50),
+    pclass: int | None = Query(None, ge=1, le=3),
+    survived: int | None = Query(None, ge=0, le=1),
+    sex: str | None = Query(None, pattern="^(female|male)$"),
+    name: str | None = Query(None, min_length=1, max_length=80),
     session: Session = Depends(get_session),
 ) -> dict[str, Any]:
-    """Return a small, paginated audit window for the post-presentation explorer."""
-    total = session.scalar(select(func.count()).select_from(Passenger)) or 0
+    """Return a filterable, paginated audit window for the presentation explorer."""
+    filters = []
+    if pclass is not None:
+        filters.append(Passenger.pclass == pclass)
+    if survived is not None:
+        filters.append(Passenger.survived == bool(survived))
+    if sex is not None:
+        filters.append(Passenger.sex == sex)
+    if name is not None:
+        filters.append(func.lower(Passenger.name).contains(name.strip().lower()))
+
+    total_query = select(func.count()).select_from(Passenger)
+    rows_query = select(Passenger)
+    if filters:
+        total_query = total_query.where(*filters)
+        rows_query = rows_query.where(*filters)
+    total = session.scalar(total_query) or 0
     rows = session.scalars(
-        select(Passenger).order_by(Passenger.passenger_id).offset(offset).limit(limit)
+        rows_query.order_by(Passenger.passenger_id).offset(offset).limit(limit)
     ).all()
     returned = len(rows)
     return {
