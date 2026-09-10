@@ -1359,10 +1359,12 @@ function App() {
                     </button>
                   ))}
                 </div>
-                <div className="comparison-reading">
-                  <p>Trecho colorido: sobreviveu · Restante da barra: não sobreviveu.</p>
-                  <p>As cores identificam as classes. Cada barra inteira representa 100% da sua classe.</p>
-                </div>
+                <ul className="comparison-legend" aria-label="Legenda de sobrevivência por classe">
+                  <li><i className="comparison-swatch class-color--1" aria-hidden="true" />Sobreviventes da 1ª classe</li>
+                  <li><i className="comparison-swatch class-color--2" aria-hidden="true" />Sobreviventes da 2ª classe</li>
+                  <li><i className="comparison-swatch class-color--3" aria-hidden="true" />Sobreviventes da 3ª classe</li>
+                  <li><i className="comparison-swatch comparison-swatch--deceased" aria-hidden="true" />Não sobreviventes de todas as classes</li>
+                </ul>
               </div>
               <aside className="finding-panel">
                 <p className="mono-label">Diferença decisiva</p>
