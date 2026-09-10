@@ -11,6 +11,7 @@ import {
 import { QRCodeSVG } from "qrcode.react";
 
 const PUBLIC_SITE_URL = "https://titanic-sobrevivencia-e-classe.vercel.app/";
+const DATA_SOURCE_URL = "https://www.kaggle.com/competitions/titanic/data";
 
 type Section = {
   slug: string;
@@ -919,7 +920,15 @@ function App() {
                 contexto; <strong>Survived</strong> e <strong>Pclass</strong>
                 formam o recorte que vamos calcular e comparar.
               </p>
-              <small className="opening-base-source">Fonte: {data.source}</small>
+              <a
+                className="opening-base-source source-link"
+                href={DATA_SOURCE_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="Abrir a fonte oficial dos dados no Kaggle em uma nova aba"
+              >
+                Fonte: {data.source}
+              </a>
               <button
                 className="ds-button ds-btn ds-button--ghost ds-btn--secondary"
                 onClick={openExplorer}
@@ -1337,7 +1346,15 @@ function App() {
                 <div className="method-lines">
                   <span>
                     Fonte{" "}
-                    <b>Kaggle · Titanic — Machine Learning from Disaster</b>
+                    <a
+                      className="source-link method-source-link"
+                      href={DATA_SOURCE_URL}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      aria-label="Abrir a fonte oficial dos dados no Kaggle em uma nova aba"
+                    >
+                      Kaggle · Titanic — Machine Learning from Disaster
+                    </a>
                   </span>
                   <span>
                     Método{" "}
