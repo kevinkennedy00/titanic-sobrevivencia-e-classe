@@ -20,7 +20,7 @@ type Section = {
   tone: string;
   position: number;
 };
-type Formula = { title: string; expression: string; explanation: string; steps: { title: string; text: string }[] };
+type Formula = { title: string; expression: string; steps: { title: string; text: string }[] };
 const decimal = (value: number) => value.toLocaleString("pt-BR", { maximumFractionDigits: 8 });
 function rateSteps(survivors: number, total: number) {
   return [
@@ -685,6 +685,10 @@ function App() {
   ];
   const classChartLabel = `Taxas de sobrevivência por classe: ${classes.map((row) => `${row.class}, ${row.rate_label}`).join("; ")}.`;
   const distributionChartLabel = `Distribuição de passageiros por classe: ${distribution.rows.map((row: any) => `${row.class}, ${row.count} passageiros, ${row.share_label}`).join("; ")}.`;
+  const brunaCentralReading = `A média olha para o conjunto: ${central.survived.mean_label} dos ${number.format(overview.total_passengers)} registros representam sobrevivência. Moda e mediana mostram o que mais se repetiu — não sobreviver e viajar na 3ª classe — sem reduzir cada pessoa a um código.`;
+  const brunaDispersionReading = `O desvio padrão e o CV mostram que os passageiros não se concentravam em apenas um código de classe. Eles ajudam a contextualizar a diversidade de posições na base; como Pclass é ordinal, porém, não medem uma distância social entre pessoas. ${dispersion.note}`;
+  const samuelRateReading = `A proporção considera todos os ${number.format(overview.total_passengers)} registros da base: sobreviventes divididos pelo total, multiplicado por 100. Na história geral destes registros, ela mostra que sobreviver não foi o desfecho mais frequente — mas ainda não explica por que os grupos tiveram resultados diferentes.`;
+  const niksonRateReading = "A taxa usa o total da própria classe como denominador. Assim, comparamos a sobrevivência dentro da realidade de cada grupo, e não apenas contagens diferentes.";
   return (
     <div className="app-shell">
       {introVisible && (
@@ -993,10 +997,7 @@ function App() {
                   <span className="panel-tag">Pclass · Survived</span>
                 </div>
                 <p className="human-reading human-reading--intro">
-                  Os registros mostram que sobreviver não foi o resultado mais
-                  comum. Para a classe, moda e mediana apontam a 3ª como a
-                  experiência mais recorrente; a média apenas resume os
-                  códigos.
+                  {brunaCentralReading}
                 </p>
                 <div className="table-head">
                   <span>Medida</span>
@@ -1027,7 +1028,6 @@ function App() {
                       title: "Coeficiente de variação",
                       steps: variationSteps(classes),
                       expression: `${dispersion.pclass.std_label} ÷ ${central.pclass.mean_label} × 100 = ${dispersion.pclass.cv_label}`,
-                      explanation: `O desvio padrão e o CV mostram que os passageiros não se concentravam em apenas um código de classe. Eles ajudam a contextualizar a diversidade de posições na base; como Pclass é ordinal, porém, não medem uma distância social entre pessoas. ${dispersion.note}`,
                     }}
                     onOpen={openFormula}
                   />
@@ -1070,8 +1070,7 @@ function App() {
               </div>
             </div>
             <p className="interpretation">
-              <Icon name="info" size={16} /> A média de Pclass resume códigos
-              ordinais; não representa uma distância real entre classes.
+              <Icon name="info" size={16} /> {brunaDispersionReading}
             </p>
           </div>
           <StageNav
@@ -1132,15 +1131,13 @@ function App() {
             </div>
             <div className="samuel-bottom">
               <p>
-              O resultado geral mostra o desfecho da base, mas ainda não diz
-              como essa experiência se distribuiu entre os grupos.
+                {samuelRateReading}
               </p>
               <FormulaButton
                 formula={{
                   title: "Taxa geral de sobrevivência",
                   steps: rateSteps(classes.reduce((sum, row) => sum + row.survivors, 0), classes.reduce((sum, row) => sum + row.total, 0)),
                   expression: survival.formula,
-                  explanation: `A proporção considera todos os ${number.format(overview.total_passengers)} registros da base: sobreviventes divididos pelo total, multiplicado por 100. Na história geral destes registros, ela mostra que sobreviver não foi o desfecho mais frequente — mas ainda não explica por que os grupos tiveram resultados diferentes.`,
                 }}
                 onOpen={openFormula}
               />
@@ -1217,13 +1214,12 @@ function App() {
                   <b>{classes[activeClass].class}</b>
                   <em>{classes[activeClass].formula}</em>
                 </div>
+                <p className="finding-reading">{niksonRateReading}</p>
                 <FormulaButton
                   formula={{
                     title: `Taxa da ${classes[activeClass].class}`,
                     steps: rateSteps(classes[activeClass].survivors, classes[activeClass].total),
                     expression: classes[activeClass].formula,
-                    explanation:
-                      "A taxa usa o total da própria classe como denominador. Assim, comparamos a sobrevivência dentro da realidade de cada grupo, e não apenas contagens diferentes.",
                   }}
                   onOpen={openFormula}
                 />
