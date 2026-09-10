@@ -1,4 +1,12 @@
 .app-shell { min-height: 100vh; overflow-x: clip; }
+.qr-launcher.icon-button { position: fixed; right: max(24px, env(safe-area-inset-right)); bottom: max(76px, env(safe-area-inset-bottom)); z-index: 40; width: 48px; height: 48px; color: var(--ds-text-primary); background: var(--ds-bg-elevated); border: 1px solid var(--ds-border-medium); cursor: pointer; }
+.qr-launcher:hover { color: var(--ds-color-primary); border-color: currentColor; }
+.qr-launcher:focus-visible { outline: 2px solid var(--ds-color-primary); outline-offset: 4px; }
+.qr-share { display: flex; flex-direction: column; align-items: center; gap: 20px; text-align: center; }
+.qr-share p { margin: 24px 0 0; color: var(--ds-text-secondary); line-height: 1.5; }
+.qr-share > svg { display: block; width: min(100%, 560px, 58dvh); height: auto; flex-shrink: 0; background: #fff; }
+.qr-share a { color: var(--ds-text-primary); overflow-wrap: anywhere; font-size: .9rem; text-underline-offset: 4px; }
+@media (max-width: 600px) { .qr-launcher.icon-button { right: max(10px, env(safe-area-inset-right)); bottom: max(18px, env(safe-area-inset-bottom)); width: 44px; height: 44px; } .qr-share { gap: 16px; } }
 .hero-mobile-cover, .hero-mobile-team { display: contents; }
 .hero-team-title { margin: 20px 0 0; color: var(--ds-text-muted); font: 600 .7rem/1.4 var(--ds-font-display); text-align: center; }
 .hero-member, .team-credit button { padding: 0; border: 0; background: transparent; cursor: pointer; }

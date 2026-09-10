@@ -8,6 +8,9 @@ import {
   useRef,
   useState,
 } from "react";
+import { QRCodeSVG } from "qrcode.react";
+
+const PUBLIC_SITE_URL = "https://titanic-sobrevivencia-e-classe.vercel.app/";
 
 type Section = {
   slug: string;
@@ -422,6 +425,7 @@ function App() {
   );
   const [formula, setFormula] = useState<Formula | null>(null);
   const [explorerOpen, setExplorerOpen] = useState(false);
+  const [qrOpen, setQrOpen] = useState(false);
   const [passengers, setPassengers] = useState<Passenger[]>([]);
   const [passengerPage, setPassengerPage] = useState(0);
   const [passengerTotal, setPassengerTotal] = useState(0);
@@ -543,7 +547,7 @@ function App() {
   }, [data, targets]);
   useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {
-      if (introVisible || formula || explorerOpen) return;
+      if (introVisible || formula || explorerOpen || qrOpen) return;
       const target = event.target as HTMLElement | null;
       const isEditable =
         target &&
@@ -572,7 +576,7 @@ function App() {
     };
     window.addEventListener("keydown", onKeyDown);
     return () => window.removeEventListener("keydown", onKeyDown);
-  }, [active, introVisible, formula, explorerOpen, targets]);
+  }, [active, introVisible, formula, explorerOpen, qrOpen, targets]);
 
   const openFormula = (item: Formula, event: MouseEvent<HTMLElement>) => {
     (event.currentTarget as HTMLElement).dataset.lastTrigger = "true";
@@ -1302,6 +1306,23 @@ function App() {
           <img src={activeSpeaker.photo} alt="" />
           <span>{activeSpeaker.speaker}</span>
         </div>
+      )}
+      {active === 0 && !introVisible && (
+        <button type="button" className="qr-launcher icon-button" aria-label="Ampliar QR Code para acessar o site" aria-haspopup="dialog" onClick={() => setQrOpen(true)} title="Abrir QR Code">
+          <svg width="25" height="25" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" aria-hidden="true">
+            <rect x="3" y="3" width="6" height="6" rx="1" /><rect x="15" y="3" width="6" height="6" rx="1" /><rect x="3" y="15" width="6" height="6" rx="1" />
+            <path d="M15 15h3v3h3v3h-6v-3M21 12v3M12 3v3M3 12h6M12 12v6M12 21h1" />
+          </svg>
+        </button>
+      )}
+      {qrOpen && (
+        <Overlay title="Acompanhe pelo celular" labelledBy="qr-title" describedBy="qr-instructions" onClose={() => setQrOpen(false)}>
+          <div className="qr-share">
+            <p id="qr-instructions">Aponte a câmera para o QR Code e abra a apresentação.</p>
+            <QRCodeSVG value={PUBLIC_SITE_URL} size={560} level="M" marginSize={4} bgColor="#ffffff" fgColor="#000000" title="QR Code para o site Titanic — Sobrevivência e Classe" />
+            <a href={PUBLIC_SITE_URL} target="_blank" rel="noopener noreferrer">titanic-sobrevivencia-e-classe.vercel.app</a>
+          </div>
+        </Overlay>
       )}
       {formula && (
         <Overlay
