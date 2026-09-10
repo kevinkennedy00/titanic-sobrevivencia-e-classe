@@ -1359,14 +1359,9 @@ function App() {
                     </button>
                   ))}
                 </div>
-                <div className="chart-legend">
-                  <span>
-                    <i className="legend-dot legend-dot--survived" /> sobreviveu
-                  </span>
-                  <span>
-                    <i className="legend-dot legend-dot--deceased" /> não
-                    sobreviveu
-                  </span>
+                <div className="comparison-reading">
+                  <p>Trecho colorido: sobreviveu · Restante da barra: não sobreviveu.</p>
+                  <p>As cores identificam as classes. Cada barra inteira representa 100% da sua classe.</p>
                 </div>
               </div>
               <aside className="finding-panel">
