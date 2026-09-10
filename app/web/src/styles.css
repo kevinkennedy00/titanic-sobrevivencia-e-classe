@@ -1,4 +1,7 @@
 .app-shell { min-height: 100vh; overflow-x: clip; }
+.samuel-technical-actions { display: flex; flex-direction: column; align-items: flex-start; gap: 2px; }
+.samuel-technical-actions .formula-trigger { min-height: 44px; padding: 4px 0; font-size: .68rem; gap: 8px; text-align: left; }
+.samuel-technical-actions .formula-icon { width: 19px; height: 19px; flex-shrink: 0; }
 .comparison-legend { display: grid; gap: 8px; margin: 22px 0 0; padding: 0; list-style: none; color: var(--ds-text-secondary); font: 400 .75rem/1.5 var(--ds-font-body); }
 .comparison-legend li { display: flex; align-items: baseline; gap: 9px; }
 .comparison-swatch { display: inline-block; flex: 0 0 11px; width: 11px; height: 11px; border-radius: 2px; }

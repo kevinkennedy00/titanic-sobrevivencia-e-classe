@@ -322,8 +322,10 @@ function SectionIntro({
 function FormulaButton({
   formula,
   onOpen,
+  label = "Ver cálculo técnico",
 }: {
   formula: Formula;
+  label?: string;
   onOpen: (formula: Formula, event: MouseEvent<HTMLElement>) => void;
 }) {
   return (
@@ -335,7 +337,7 @@ function FormulaButton({
       <span className="formula-icon">
         <Icon name="info" size={15} />
       </span>
-      <span>Ver cálculo técnico</span>
+      <span>{label}</span>
     </button>
   );
 }
@@ -1297,7 +1299,9 @@ function App() {
                 <span><b>DP</b> {dispersion.survived.std_label}</span>
                 <span><b>CV</b> {dispersion.survived.cv_label}</span>
               </div>
+              <div className="samuel-technical-actions">
               <FormulaButton
+                label="Cálculo da sobrevivência"
                 formula={{
                   title: "DP e CV da sobrevivência",
                   steps: survivalVariationSteps(survival.survived, overview.total_passengers),
@@ -1305,6 +1309,23 @@ function App() {
                 }}
                 onOpen={openFormula}
               />
+              <FormulaButton
+                label="DP e CV das tarifas"
+                formula={{
+                  title: "DP e CV das tarifas",
+                  expression: "Média ≈ 32,20; DP ≈ 49,67; CV ≈ 154,22%",
+                  steps: [
+                    { title: "Base e variável", text: "Exemplo complementar calculado sobre Fare nos 891 registros do train.csv deste projeto, sem ausências nessa coluna. Foram mantidas as tarifas zero e todos os valores registrados, sem remoção de extremos. Fare representa a tarifa registrada, não a renda do passageiro." },
+                    { title: "Fórmulas e símbolos", text: "μ = Σxᵢ / N; σ² = Σ(xᵢ − μ)² / N; DP = σ = √σ²; CV = (σ / μ) × 100%. xᵢ é a tarifa registrada e N = 891. Usamos ddof = 0 para descrever esta base, dividindo por N, não N − 1." },
+                    { title: "Média das tarifas", text: "μ = ΣFare / 891 ≈ 32,20420797. Os cálculos mantêm a precisão dos valores; os decimais apresentados são aproximações." },
+                    { title: "Variância e desvio padrão", text: "Σ(Fare − μ)² ≈ 2.197.798,79271137. σ² = Σ(Fare − μ)² / 891 ≈ 2.466,66531169. DP = √σ² ≈ 49,66553444, na mesma unidade monetária de Fare. A variância fica nessa unidade ao quadrado." },
+                    { title: "Coeficiente de variação", text: "CV = (49,66553444 / 32,20420797) × 100% ≈ 154,22063630%. O DP equivale a cerca de 154,22% da média. Um CV acima de 100% é possível: não representa uma porcentagem de passageiros nem uma probabilidade." },
+                    { title: "Interpretação e limites", text: "As tarifas apresentam grande dispersão em relação à média. Diferentemente de Pclass, Fare é uma variável quantitativa monetária, não um código ordinal. Média e DP são sensíveis a valores extremos; tarifas registradas variam de 0 a 512,3292. O DP não é um afastamento médio absoluto nem um intervalo que contenha necessariamente a maioria das tarifas. Este exemplo descreve os valores registrados: não mede diretamente riqueza, desigualdade social ou efeito causal do preço sobre a sobrevivência." },
+                  ],
+                }}
+                onOpen={openFormula}
+              />
+              </div>
             </div>
           </div>
           <StageNav
