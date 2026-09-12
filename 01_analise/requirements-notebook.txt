@@ -1,0 +1,4 @@
+-r ../app/api/requirements.txt
+matplotlib==3.10.6
+seaborn==0.13.2
+ipython==9.5.0

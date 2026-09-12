@@ -1,0 +1,19 @@
+# Cloud Run only needs the API, source CSV and team photos.
+.git
+.env
+.venv
+node_modules
+app/web
+01_analise
+02_referencias
+03_documentacao
+04_dados_auxiliares
+05_pacotes_arquivo
+Estatistica - Onildo
+graficos_final
+graficos_titanic
+output
+tmp
+work
+*.pdf
+*.md
