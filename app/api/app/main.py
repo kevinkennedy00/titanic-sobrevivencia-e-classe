@@ -1,18 +1,15 @@
 from __future__ import annotations
 
 import os
-from datetime import datetime, timezone
+from functools import lru_cache
 from pathlib import Path
 from typing import Any
 from urllib.parse import quote
 
 import pandas as pd
-from fastapi import Depends, FastAPI, HTTPException, Query, Request
+from fastapi import FastAPI, HTTPException, Query, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
-from sqlalchemy import Boolean, Float, Integer, JSON, String, Text, create_engine, func, select, text
-from sqlalchemy.dialects.postgresql import JSONB
-from sqlalchemy.orm import DeclarativeBase, Mapped, Session, mapped_column, sessionmaker
 
 
 SOURCE_PATH = Path(__file__).resolve()
@@ -20,51 +17,9 @@ PROJECT_ROOT = next(
     (parent for parent in SOURCE_PATH.parents if (parent / "train.csv").exists()),
     Path.cwd(),
 )
-DATABASE_URL = os.getenv(
-    "DATABASE_URL",
-    "sqlite:////tmp/titanic.db" if os.getenv("VERCEL") else f"sqlite:///{PROJECT_ROOT / 'titanic.db'}",
-)
 DATASET_PATH = Path(os.getenv("DATASET_PATH", str(PROJECT_ROOT / "train.csv")))
 TEAM_PATH = Path(os.getenv("TEAM_PATH", str(PROJECT_ROOT / "06_membros_equipe")))
 CORS_ORIGINS = [item.strip() for item in os.getenv("CORS_ORIGINS", "http://localhost:3011").split(",")]
-
-
-class Base(DeclarativeBase):
-    pass
-
-
-class Passenger(Base):
-    __tablename__ = "passengers"
-
-    passenger_id: Mapped[int] = mapped_column(Integer, primary_key=True)
-    survived: Mapped[bool] = mapped_column(Boolean, nullable=False)
-    pclass: Mapped[int] = mapped_column(Integer, nullable=False, index=True)
-    name: Mapped[str] = mapped_column(Text, nullable=False)
-    sex: Mapped[str] = mapped_column(String(16), nullable=False)
-    age: Mapped[float | None] = mapped_column(Float)
-    sib_sp: Mapped[int] = mapped_column(Integer, nullable=False)
-    parch: Mapped[int] = mapped_column(Integer, nullable=False)
-    ticket: Mapped[str] = mapped_column(String(64), nullable=False)
-    fare: Mapped[float] = mapped_column(Float, nullable=False)
-    cabin: Mapped[str | None] = mapped_column(String(32))
-    embarked: Mapped[str | None] = mapped_column(String(4))
-
-
-class MetricSnapshot(Base):
-    __tablename__ = "metric_snapshots"
-
-    slug: Mapped[str] = mapped_column(String(80), primary_key=True)
-    payload: Mapped[dict[str, Any]] = mapped_column(JSONB().with_variant(JSON, "sqlite"), nullable=False)
-    updated_at: Mapped[datetime] = mapped_column(nullable=False)
-
-
-engine = create_engine(DATABASE_URL, pool_pre_ping=True)
-SessionLocal = sessionmaker(bind=engine, autoflush=False, autocommit=False)
-
-
-def get_session():
-    with SessionLocal() as session:
-        yield session
 
 
 def percentage(value: float) -> str:
@@ -97,35 +52,11 @@ def presentation_sections() -> list[dict[str, Any]]:
     ]
 
 
+@lru_cache(maxsize=1)
 def source_frame() -> pd.DataFrame:
     if not DATASET_PATH.exists():
         raise FileNotFoundError(f"Base Titanic não encontrada em {DATASET_PATH}")
     return pd.read_csv(DATASET_PATH)
-
-
-def seed_passengers(session: Session) -> None:
-    if session.scalar(select(func.count()).select_from(Passenger)):
-        return
-    frame = source_frame()
-    passengers = [
-        Passenger(
-            passenger_id=int(row.PassengerId),
-            survived=bool(row.Survived),
-            pclass=int(row.Pclass),
-            name=str(row.Name),
-            sex=str(row.Sex),
-            age=None if pd.isna(row.Age) else float(row.Age),
-            sib_sp=int(row.SibSp),
-            parch=int(row.Parch),
-            ticket=str(row.Ticket),
-            fare=float(row.Fare),
-            cabin=None if pd.isna(row.Cabin) else str(row.Cabin),
-            embarked=None if pd.isna(row.Embarked) else str(row.Embarked),
-        )
-        for row in frame.itertuples(index=False)
-    ]
-    session.add_all(passengers)
-    session.commit()
 
 
 def metric_payloads() -> dict[str, dict[str, Any]]:
@@ -296,24 +227,10 @@ def metric_payloads() -> dict[str, dict[str, Any]]:
     }
 
 
-def refresh_metrics(session: Session) -> None:
-    generated_at = datetime.now(timezone.utc)
-    for slug, payload in metric_payloads().items():
-        snapshot = session.get(MetricSnapshot, slug)
-        if snapshot is None:
-            snapshot = MetricSnapshot(slug=slug, payload=payload, updated_at=generated_at)
-            session.add(snapshot)
-        else:
-            snapshot.payload = payload
-            snapshot.updated_at = generated_at
-    session.commit()
-
-
 def bootstrap() -> None:
-    Base.metadata.create_all(engine)
-    with SessionLocal() as session:
-        seed_passengers(session)
-        refresh_metrics(session)
+    """Validate the immutable CSV source once when an API instance starts."""
+    source_frame()
+    metric_payloads()
 
 
 app = FastAPI(
@@ -349,14 +266,13 @@ def on_startup() -> None:
 
 
 @app.get("/api/health")
-def health(session: Session = Depends(get_session)) -> dict[str, str]:
-    session.execute(text("SELECT 1"))
-    return {"status": "UP"}
+def health() -> dict[str, Any]:
+    return {"status": "UP", "storage": "memory", "records": int(len(source_frame()))}
 
 
 @app.get("/api/presentation")
-def presentation(session: Session = Depends(get_session)) -> dict[str, Any]:
-    snapshots = {row.slug: row.payload for row in session.scalars(select(MetricSnapshot)).all()}
+def presentation() -> dict[str, Any]:
+    snapshots = metric_payloads()
     return {
         "title": "Titanic — Sobrevivência e Classe",
         "subtitle": "Análise estatística descritiva",
@@ -371,13 +287,14 @@ def presentation(session: Session = Depends(get_session)) -> dict[str, Any]:
 
 
 @app.get("/api/metrics")
-def metrics(session: Session = Depends(get_session)) -> list[dict[str, Any]]:
-    return [row.payload for row in session.scalars(select(MetricSnapshot).order_by(MetricSnapshot.slug)).all()]
+def metrics() -> list[dict[str, Any]]:
+    snapshots = metric_payloads()
+    return [snapshots[slug] for slug in sorted(snapshots)]
 
 
 @app.get("/api/metrics/{slug}")
-def metric(slug: str, session: Session = Depends(get_session)) -> dict[str, Any]:
-    snapshot = session.get(MetricSnapshot, slug)
+def metric(slug: str) -> dict[str, Any]:
+    snapshot = metric_payloads().get(slug)
     if snapshot is None:
         raise HTTPException(status_code=404, detail="Métrica não encontrada.")
     return snapshot.payload
@@ -391,28 +308,37 @@ def passengers(
     survived: int | None = Query(None, ge=0, le=1),
     sex: str | None = Query(None, pattern="^(female|male)$"),
     name: str | None = Query(None, min_length=1, max_length=80),
-    session: Session = Depends(get_session),
 ) -> dict[str, Any]:
     """Return a filterable, paginated audit window for the presentation explorer."""
-    filters = []
+    frame = source_frame()
     if pclass is not None:
-        filters.append(Passenger.pclass == pclass)
+        frame = frame.loc[frame["Pclass"] == pclass]
     if survived is not None:
-        filters.append(Passenger.survived == bool(survived))
+        frame = frame.loc[frame["Survived"] == survived]
     if sex is not None:
-        filters.append(Passenger.sex == sex)
+        frame = frame.loc[frame["Sex"] == sex]
     if name is not None:
-        filters.append(func.lower(Passenger.name).contains(name.strip().lower()))
+        frame = frame.loc[frame["Name"].str.contains(name.strip(), case=False, regex=False, na=False)]
 
-    total_query = select(func.count()).select_from(Passenger)
-    rows_query = select(Passenger)
-    if filters:
-        total_query = total_query.where(*filters)
-        rows_query = rows_query.where(*filters)
-    total = session.scalar(total_query) or 0
-    rows = session.scalars(
-        rows_query.order_by(Passenger.passenger_id).offset(offset).limit(limit)
-    ).all()
+    total = int(len(frame))
+    page = frame.sort_values("PassengerId").iloc[offset : offset + limit]
+    rows = [
+        {
+            "passenger_id": int(row.PassengerId),
+            "survived": int(row.Survived),
+            "pclass": int(row.Pclass),
+            "name": str(row.Name),
+            "sex": str(row.Sex),
+            "age": None if pd.isna(row.Age) else float(row.Age),
+            "sib_sp": int(row.SibSp),
+            "parch": int(row.Parch),
+            "ticket": str(row.Ticket),
+            "fare": float(row.Fare),
+            "cabin": None if pd.isna(row.Cabin) else str(row.Cabin),
+            "embarked": None if pd.isna(row.Embarked) else str(row.Embarked),
+        }
+        for row in page.itertuples(index=False)
+    ]
     returned = len(rows)
     return {
         "total": total,
@@ -420,21 +346,5 @@ def passengers(
         "limit": limit,
         "returned": returned,
         "has_more": offset + returned < total,
-        "rows": [
-            {
-                "passenger_id": row.passenger_id,
-                "survived": int(row.survived),
-                "pclass": row.pclass,
-                "name": row.name,
-                "sex": row.sex,
-                "age": row.age,
-                "sib_sp": row.sib_sp,
-                "parch": row.parch,
-                "ticket": row.ticket,
-                "fare": row.fare,
-                "cabin": row.cabin,
-                "embarked": row.embarked,
-            }
-            for row in rows
-        ],
+        "rows": rows,
     }

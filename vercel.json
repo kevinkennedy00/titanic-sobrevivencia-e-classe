@@ -1,21 +1,14 @@
 {
   "builds": [
     {
-      "src": "api/index.py",
-      "use": "@vercel/python",
-      "config": {
-        "includeFiles": ["train.csv", "06_membros_equipe/**", "app/api/app/**"]
-      }
-    },
-    {
       "src": "app/web/package.json",
       "use": "@vercel/static-build",
       "config": { "distDir": "dist" }
     }
   ],
   "rewrites": [
-    { "source": "/api/(.*)", "destination": "/api/index.py?path=api/$1" },
-    { "source": "/team/(.*)", "destination": "/api/index.py?path=team/$1" },
+    { "source": "/api/(.*)", "destination": "https://titanic-presentation-api-xrhxn6whyq-rj.a.run.app/api/$1" },
+    { "source": "/team/(.*)", "destination": "https://titanic-presentation-api-xrhxn6whyq-rj.a.run.app/team/$1" },
     { "source": "/assets/(.*)", "destination": "/app/web/assets/$1" },
     { "source": "/design-system/(.*)", "destination": "/app/web/design-system/$1" },
     { "source": "/", "destination": "/app/web/index.html" },
