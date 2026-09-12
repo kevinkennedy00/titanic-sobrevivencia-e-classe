@@ -24,7 +24,8 @@ PROJECT_ROOT = next(
     (parent for parent in SOURCE_PATH.parents if (parent / "train.csv").exists()),
     Path.cwd(),
 )
-TEAM_PATH = Path(os.getenv("TEAM_PATH", str(PROJECT_ROOT / "06_membros_equipe")))
+TEAM_PATH = Path(os.getenv("TEAM_PATH", str(PROJECT_ROOT / "assets" / "equipe")))
+WEB_DIST_PATH = Path(os.getenv("WEB_DIST_PATH", str(PROJECT_ROOT / "app" / "web" / "dist")))
 CORS_ORIGINS = [item.strip() for item in os.getenv("CORS_ORIGINS", "http://localhost:3011").split(",")]
 
 
@@ -145,3 +146,10 @@ def passengers(
     returned = len(rows)
     return {"total": total, "offset": offset, "limit": limit, "returned": returned,
             "has_more": offset + returned < total, "rows": rows}
+
+
+# A cloned repository can serve the already built presentation with Python.
+# The Docker and Cloud Run API images do not contain this directory, so this
+# mount is naturally absent from those API-only deployments.
+if WEB_DIST_PATH.exists():
+    app.mount("/", StaticFiles(directory=WEB_DIST_PATH, html=True), name="presentation")

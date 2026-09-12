@@ -1,37 +1,63 @@
 param([switch]$SemAbrirNavegador)
+
 $ErrorActionPreference = 'Stop'
 Set-Location -LiteralPath $PSScriptRoot
-try {
-    if (-not (Get-Command docker -ErrorAction SilentlyContinue)) { throw 'Docker Desktop nao encontrado. Instale e prepare o projeto com internet antes da apresentacao.' }
-    Write-Host 'Verificando Docker Desktop...'
-    $ErrorActionPreference = 'Continue'
-    docker info *> $null
-    $ErrorActionPreference = 'Stop'
-    if ($LASTEXITCODE -ne 0) {
-        $dockerDesktop = Join-Path $env:ProgramFiles 'Docker\Docker\Docker Desktop.exe'
-        if (-not (Test-Path -LiteralPath $dockerDesktop)) { throw 'Abra o Docker Desktop e tente novamente.' }
-        Start-Process -FilePath $dockerDesktop -WindowStyle Hidden
-        $deadline = (Get-Date).AddMinutes(3)
-        do {
-            Start-Sleep -Seconds 3
-            $ErrorActionPreference = 'Continue'
-            docker info *> $null
-            $ErrorActionPreference = 'Stop'
-            $dockerReady = $LASTEXITCODE -eq 0
-        } until ($dockerReady -or (Get-Date) -ge $deadline)
-        if (-not $dockerReady) { throw 'O Docker nao ficou pronto em 3 minutos. Confira o Docker Desktop e tente novamente.' }
+$url = 'http://127.0.0.1:3011/'
+$python = Join-Path $PSScriptRoot '.titanic-runtime\Scripts\python.exe'
+
+function Test-TitanicLocal {
+    try {
+        $health = Invoke-RestMethod -UseBasicParsing -Uri ($url + 'api/health') -TimeoutSec 3
+        return $health.status -eq 'UP'
+    } catch {
+        return $false
     }
-    Write-Host 'Iniciando Titanic com imagens locais, sem downloads...'
-    $ErrorActionPreference = 'Continue'
-    docker compose up -d --no-build --pull never --wait --wait-timeout 180
-    $ErrorActionPreference = 'Stop'
-    if ($LASTEXITCODE -ne 0) { throw 'Falha ao iniciar. Se faltarem imagens, execute com internet: docker compose build api web. Depois tente novamente.' }
-    $url = 'http://127.0.0.1:3011/'
-    $page = Invoke-WebRequest -UseBasicParsing -Uri $url -TimeoutSec 15
-    $data = Invoke-RestMethod -Uri ($url + 'api/presentation') -TimeoutSec 30
-    if ($page.StatusCode -ne 200 -or -not $data) { throw 'O site ou os dados locais nao responderam corretamente.' }
-    Write-Host "Pronto! Apresentacao local: $url" -ForegroundColor Green
-    Write-Host 'Pode usar sem internet neste computador. Links externos e QR do site publico precisam de conexao.'
+}
+
+try {
+    if (Test-TitanicLocal) {
+        Write-Host "A apresentacao ja esta aberta em $url" -ForegroundColor Green
+    } else {
+        if (-not (Test-Path -LiteralPath $python)) {
+            if (-not (Get-Command py -ErrorAction SilentlyContinue)) {
+                throw 'Python nao encontrado. Instale Python 3.11 ou superior e execute este arquivo novamente.'
+            }
+            Write-Host 'Preparando ambiente Python local...'
+            $ErrorActionPreference = 'Continue'
+            & py -3.11 --version *> $null
+            $python311Available = $LASTEXITCODE -eq 0
+            $ErrorActionPreference = 'Stop'
+            if (-not $python311Available) {
+                throw 'Python 3.11 nao encontrado. Instale-o para executar a apresentacao localmente.'
+            }
+            & py -3.11 -m venv .titanic-runtime
+            if ($LASTEXITCODE -ne 0) { throw 'Nao foi possivel criar o ambiente Python local.' }
+        }
+
+        $ErrorActionPreference = 'Continue'
+        & $python -c "import fastapi, pandas, uvicorn" *> $null
+        $dependenciesReady = $LASTEXITCODE -eq 0
+        $ErrorActionPreference = 'Stop'
+        if (-not $dependenciesReady) {
+            Write-Host 'Instalando dependencias da primeira execucao...'
+            & $python -m pip install --disable-pip-version-check -r app/api/requirements.txt
+            if ($LASTEXITCODE -ne 0) { throw 'Falha ao instalar as dependencias Python.' }
+        }
+
+        Write-Host 'Iniciando apresentacao local com Python...'
+        Start-Process -FilePath $python -ArgumentList @('-m', 'uvicorn', 'app.main:app', '--app-dir', 'app/api', '--host', '127.0.0.1', '--port', '3011') -WindowStyle Hidden
+
+        $deadline = (Get-Date).AddSeconds(45)
+        do {
+            Start-Sleep -Milliseconds 800
+            $ready = Test-TitanicLocal
+        } until ($ready -or (Get-Date) -ge $deadline)
+        if (-not $ready) { throw 'A apresentacao nao iniciou. Confira se a porta 3011 esta livre e tente novamente.' }
+        Write-Host "Pronto! Apresentacao local: $url" -ForegroundColor Green
+    }
+
+    Write-Host 'Nao usa Docker, banco de dados ou Node.js para executar.'
+    Write-Host 'Na primeira vez e preciso internet somente para instalar as bibliotecas Python.'
     if (-not $SemAbrirNavegador) { Start-Process $url }
     exit 0
 } catch {

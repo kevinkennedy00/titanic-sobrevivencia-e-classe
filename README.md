@@ -14,7 +14,7 @@ Esta é a forma recomendada de avaliar o trabalho. Ela reúne o roteiro da apres
 |---|---|---|
 | [Apresentação no Vercel](https://titanic-sobrevivencia-e-classe.vercel.app/) | Para ver o projeto pronto | Narrativa, gráficos, modais técnicos, explorador de passageiros e filtros |
 | [Notebook de auditoria](01_analise/notebooks/Titanic_Apresentacao_Final.ipynb) | Para conferir a análise em Python | Tabelas, fórmulas, validações e gráfico sem abrir o frontend |
-| Execução local com Docker | Para rodar a apresentação sem depender do site publicado | Frontend e API completos em `http://127.0.0.1:3011/` |
+| Execução local com Python | Para rodar a apresentação sem depender do site publicado | Frontend e API completos em `http://127.0.0.1:3011/` |
 | [API de dados](https://titanic-presentation-api-xrhxn6whyq-rj.a.run.app/docs) | Para inspecionar a origem dos dados do frontend | Rotas, métricas calculadas e filtros da base |
 
 ## Como executar o notebook no VS Code
@@ -47,31 +47,26 @@ Em seguida, abra `01_analise/notebooks/Titanic_Apresentacao_Final.ipynb` dentro 
 
 ## Como executar a apresentação localmente
 
-Pré-requisito: [Docker Desktop](https://www.docker.com/products/docker-desktop/) instalado e iniciado.
+Pré-requisito: Python 3.11 instalado. Não é necessário Docker, banco de dados ou Node.js.
 
-Na primeira execução, com internet disponível, abra um terminal na raiz do projeto e rode:
-
-```bash
-docker compose build
-```
-
-Depois, basta dar dois cliques em `iniciar-titanic.bat`. O navegador abrirá em:
+Basta dar dois cliques em `iniciar-titanic.bat`. Na primeira execução, o atalho cria o ambiente Python e instala as bibliotecas necessárias. O navegador abrirá em:
 
 ```text
 http://127.0.0.1:3011/
 ```
 
-Após as imagens Docker já estarem preparadas, a execução local funciona sem internet. Links externos, o QR Code e a versão do Vercel naturalmente exigem conexão.
+Após essa preparação inicial, a execução local funciona sem internet. Links externos, o QR Code e a versão do Vercel naturalmente exigem conexão.
 
 ## Como o projeto está organizado
 
 ```text
 train.csv                         Fonte única: 891 registros e 12 colunas
+assets/equipe/                    Fotos dos integrantes, organizadas fora da raiz
 app/api/app/analysis_core.py      Validação e cálculos estatísticos compartilhados
 app/api/app/main.py               API FastAPI usada pelo frontend
 01_analise/notebooks/             Notebook auditável com tabelas e gráfico
 app/web/                          Interface da apresentação
-docker-compose.yml                Execução local sem banco de dados
+iniciar-titanic.bat               Atalho de execução local sem Docker
 ```
 
 O projeto não usa banco de dados: os dados são lidos diretamente de `train.csv`. Isso torna a entrega reproduzível, reduz dependências e mantém os cálculos auditáveis.

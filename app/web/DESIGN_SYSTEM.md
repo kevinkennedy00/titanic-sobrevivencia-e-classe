@@ -35,7 +35,7 @@ As primitivas compartilham foco visível, SVG inline consistente e suporte a `pr
 - Fontes: `public/design-system/fonts/`.
 - Marca Unifacisa: `public/design-system/institution/unifacisa.png`.
 - Banner institucional: `public/design-system/institution/campus-banner.jpg`.
-- Fotos de integrantes: caminhos locais `/team/`, preservados pelo volume de ativos da aplicação.
+- Fotos de integrantes: caminhos locais `/team/`, preservados em `assets/equipe/` como ativos da aplicação.
 
 ## Referências locais
 
